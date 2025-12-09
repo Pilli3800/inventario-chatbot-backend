@@ -6,6 +6,7 @@ import com.pilli3800.inventario.data.dto.request.LoginRequest;
 import com.pilli3800.inventario.data.dto.request.RegisterRequest;
 import com.pilli3800.inventario.data.dto.response.SingleResponse;
 import com.pilli3800.inventario.service.AuthService;
+import com.pilli3800.inventario.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
 
     @PostMapping("/login")
     public SingleResponse<AuthResponse> login(@RequestBody LoginRequest request) {
@@ -39,7 +41,7 @@ public class AuthController {
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/cambiar-password")
     public void changePassword(@Valid @RequestBody ChangePasswordRequest req) {
-        String identUsuario = SecurityContextHolder.getContext().getAuthentication().getName();
+        String identUsuario = userService.getIdentUsuario();
         authService.cambiarPassword(identUsuario, req.actualPassword(), req.nuevaPassword());
     }
 }

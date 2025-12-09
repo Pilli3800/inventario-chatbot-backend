@@ -23,7 +23,7 @@ public class RegistroAuditoriaListener {
 
     private String currentUser(){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if(auth == null || auth.getName().equals("anonymousUser")){
+        if(auth == null || auth.getName().equals("anonymousUser")) {
             return "SYSTEM";
         }
         return auth.getName();
