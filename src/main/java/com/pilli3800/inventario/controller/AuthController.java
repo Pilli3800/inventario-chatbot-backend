@@ -4,13 +4,12 @@ import com.pilli3800.inventario.data.dto.auth.AuthResponse;
 import com.pilli3800.inventario.data.dto.request.ChangePasswordRequest;
 import com.pilli3800.inventario.data.dto.request.LoginRequest;
 import com.pilli3800.inventario.data.dto.request.RegisterRequest;
-import com.pilli3800.inventario.data.dto.response.SingleResponse;
+import com.pilli3800.inventario.data.dto.response.general.SingleResponse;
 import com.pilli3800.inventario.service.AuthService;
 import com.pilli3800.inventario.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

@@ -3,7 +3,7 @@ spring:
     name: inventario
 
   datasource:
-    url: jdbc:mysql://localhost:3306/inventario_chatbot?useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/inventario_chatbot?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -19,5 +19,5 @@ spring:
 
 security:
   jwt:
-    secret-key: "cambia-esto-por-un-secreto-largo-y-seguro-1234567890"
+    secret-key: "VmpzNGN5U21hVlFxZ2hRREhKZHc0ZmtlQnFRQTR0Yk9sOUVsb2c3Y2VvMUpjR1N1UWxKWFdDazUzYmdlM3Q4T1d0UXJ4UjJ0VmxHUnVjR29KcG9sQ1pYdkE5S2FhV3J4Y0hGZW5lVTRWdHdEalZlRzZ6Zk5rMWFh"
     expiration-minutes: 60

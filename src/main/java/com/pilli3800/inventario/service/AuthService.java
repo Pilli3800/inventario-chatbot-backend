@@ -12,6 +12,8 @@ import com.pilli3800.inventario.validator.RegisterValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -43,6 +45,10 @@ public class AuthService {
         User user = userRepository
                 .findByIdentUsuario(request.identUsuario())
                 .orElseThrow();
+
+        if (!user.isEnabled()) {
+            throw new BadCredentialsException("La cuenta del usuario " + request.identUsuario() + " está deshabilitada.");
+        }
 
         UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                 user.getIdentUsuario(),

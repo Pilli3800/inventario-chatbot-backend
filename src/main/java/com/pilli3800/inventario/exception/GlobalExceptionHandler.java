@@ -1,6 +1,6 @@
 package com.pilli3800.inventario.exception;
 
-import com.pilli3800.inventario.data.dto.response.SingleResponse;
+import com.pilli3800.inventario.data.dto.response.general.SingleResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
