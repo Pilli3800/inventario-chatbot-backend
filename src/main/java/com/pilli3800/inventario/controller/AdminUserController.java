@@ -58,7 +58,7 @@ public class AdminUserController {
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
-    public SingleResponse<UserDto> createUser(@RequestBody RegisterRequest request) {
+    public SingleResponse<UserDto> createUser(@Valid @RequestBody RegisterRequest request) {
         return new SingleResponse<>(
                 201,
                 "/api/admin/users",
