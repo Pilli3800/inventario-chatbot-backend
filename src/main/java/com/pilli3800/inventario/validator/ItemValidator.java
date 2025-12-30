@@ -1,0 +1,49 @@
+package com.pilli3800.inventario.validator;
+
+import com.pilli3800.inventario.data.dto.request.ItemCreateRequest;
+import com.pilli3800.inventario.exception.ValidationException;
+import com.pilli3800.inventario.repository.ItemRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+@Component
+@RequiredArgsConstructor
+public class ItemValidator {
+
+    private final ItemRepository itemRepository;
+
+    public void validate(ItemCreateRequest request) {
+
+        List<String> errors = new ArrayList<>();
+
+        // Código único
+        if (itemRepository.existsByCodigoItem(request.codigoItem())) {
+            errors.add("El código de item ya existe");
+        }
+
+        // Tipo obligatorio
+        if (request.tipo() == null) {
+            errors.add("El tipo de item es obligatorio");
+        }
+
+        // Nombre obligatorio
+        if (request.nombre() == null || request.nombre().isBlank()) {
+            errors.add("El nombre del item es obligatorio");
+        }
+
+        // Stock inicial válido
+        if (request.stockInicial() == null) {
+            errors.add("El stock inicial es obligatorio");
+        } else if (request.stockInicial().compareTo(BigDecimal.ZERO) < 0) {
+            errors.add("El stock inicial no puede ser negativo");
+        }
+
+        if (!errors.isEmpty()) {
+            throw new ValidationException(errors);
+        }
+    }
+}
