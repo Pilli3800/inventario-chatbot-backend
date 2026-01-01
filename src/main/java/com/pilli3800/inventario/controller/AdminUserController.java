@@ -13,9 +13,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -105,5 +112,34 @@ public class AdminUserController {
                 "/api/admin/users/" + identUsuario + "/password",
                 "Contraseña actualizada por administrador"
         );
+    }
+
+    @GetMapping("/users/export/excel")
+    public ResponseEntity<byte[]> exportUsersExcel(
+            @RequestParam(required = false) String nombres,
+            @RequestParam(required = false) String apellidos,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String identUsuario,
+            @RequestParam(required = false) String dni,
+            @RequestParam(required = false) Boolean enabled,
+            @RequestParam(required = false) String rol
+    ) throws IOException {
+
+        UserSearchRequest request = new UserSearchRequest(
+                nombres, apellidos, email, identUsuario, dni, enabled, rol
+        );
+
+        byte[] excel = adminService.exportUsersToExcel(request);
+
+        String fecha = LocalDate.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String filename = "usuarios_" + fecha + ".xlsx";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + filename)
+                .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(excel);
     }
 }
