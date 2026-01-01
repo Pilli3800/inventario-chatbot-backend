@@ -15,6 +15,14 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 
 @RestController
 @RequestMapping("/api/logistica/items")
@@ -102,5 +110,32 @@ public class ItemController {
                 "Item activado"
         );
     }
+
+    @GetMapping("/export/excel")
+    public ResponseEntity<byte[]> exportItemsExcel(
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) String codigoItem,
+            @RequestParam(required = false) TipoItem tipo,
+            @RequestParam(required = false) Boolean enabled
+    ) throws IOException {
+
+        ItemSearchRequest request = new ItemSearchRequest(
+                nombre, codigoItem, tipo, enabled
+        );
+
+        byte[] excel = itemService.exportItemsToExcel(request);
+
+        String fecha = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        String filename = "items_" + fecha + ".xlsx";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=" + filename)
+                .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(excel);
+
+    }
+
 
 }
