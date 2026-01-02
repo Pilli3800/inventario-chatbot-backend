@@ -162,4 +162,86 @@ public class ItemService {
         return out.toByteArray();
     }
 
+    public byte[] exportItemsToExcelAuditoria(ItemSearchRequest request) throws IOException {
+
+        Specification<Item> spec = ItemSpecifications.search(request);
+        List<Item> items = itemRepository.findAll(spec);
+
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Items Auditoría");
+
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+
+        Row header = sheet.createRow(0);
+
+        String[] headers = {
+                "ID",
+                "Tipo",
+                "Nombre",
+                "Código",
+                "Stock Total",
+                "Stock Disponible",
+                "Activo",
+                "Observaciones",
+                "Fecha Creación",
+                "Usuario Creación",
+                "Fecha Actualización",
+                "Usuario Actualización"
+        };
+
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = header.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowIdx = 1;
+        for (Item item : items) {
+            Row row = sheet.createRow(rowIdx++);
+
+            row.createCell(0).setCellValue(item.getId());
+            row.createCell(1).setCellValue(item.getTipo().name());
+            row.createCell(2).setCellValue(item.getNombre());
+            row.createCell(3).setCellValue(item.getCodigoItem());
+            row.createCell(4).setCellValue(item.getStockTotal().doubleValue());
+            row.createCell(5).setCellValue(item.getStockDisponible().doubleValue());
+            row.createCell(6).setCellValue(item.isEnabled());
+            row.createCell(7).setCellValue(item.getObservaciones());
+
+            row.createCell(8).setCellValue(
+                    item.getFcCreacion() != null
+                            ? item.getFcCreacion().toString()
+                            : ""
+            );
+            row.createCell(9).setCellValue(
+                    item.getUsuCreacion() != null
+                            ? item.getUsuCreacion()
+                            : ""
+            );
+            row.createCell(10).setCellValue(
+                    item.getFcActualizacion() != null
+                            ? item.getFcActualizacion().toString()
+                            : ""
+            );
+            row.createCell(11).setCellValue(
+                    item.getUsuActualizacion() != null
+                            ? item.getUsuActualizacion()
+                            : ""
+            );
+        }
+
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        workbook.write(out);
+        workbook.close();
+
+        return out.toByteArray();
+    }
+
 }
