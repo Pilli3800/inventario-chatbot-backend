@@ -9,6 +9,5 @@ public record ItemCreateRequest(
         String nombre,
         String descripcion,
         String codigoItem,
-        BigDecimal stockInicial,
         String observaciones
 ) { }

@@ -35,13 +35,6 @@ public class ItemValidator {
             errors.add("El nombre del item es obligatorio");
         }
 
-        // Stock inicial válido
-        if (request.stockInicial() == null) {
-            errors.add("El stock inicial es obligatorio");
-        } else if (request.stockInicial().compareTo(BigDecimal.ZERO) < 0) {
-            errors.add("El stock inicial no puede ser negativo");
-        }
-
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }

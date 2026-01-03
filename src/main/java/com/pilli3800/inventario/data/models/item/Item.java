@@ -21,6 +21,9 @@ public class Item extends RegistroAuditoria {
     @Column(name = "id_item", nullable = false)
     private Long id;
 
+    @Column(name = "codigo_item", unique = true, nullable = false, length = 50)
+    private String codigoItem;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private TipoItem tipo;
@@ -29,15 +32,6 @@ public class Item extends RegistroAuditoria {
     private String nombre;
 
     private String descripcion;
-
-    @Column(name = "codigo_item", unique = true, nullable = false, length = 50)
-    private String codigoItem;
-
-    @Column(name = "stock_total", nullable = false, precision = 12, scale = 2)
-    private BigDecimal stockTotal = BigDecimal.ZERO;;
-
-    @Column(name = "stock_disponible", nullable = false, precision = 12, scale = 2)
-    private BigDecimal stockDisponible = BigDecimal.ZERO;
 
     @Column(nullable = false)
     private boolean enabled = true;

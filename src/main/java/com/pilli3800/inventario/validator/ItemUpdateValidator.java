@@ -5,7 +5,6 @@ import com.pilli3800.inventario.exception.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,21 +18,6 @@ public class ItemUpdateValidator {
 
         if (request.nombre() != null && request.nombre().isBlank()) {
             errors.add("El nombre del item no puede estar vacío");
-        }
-
-        if (request.stockTotal() != null &&
-                request.stockTotal().compareTo(BigDecimal.ZERO) < 0) {
-            errors.add("El stock total no puede ser negativo");
-        }
-
-        if (request.stockDisponible() != null &&
-                request.stockDisponible().compareTo(BigDecimal.ZERO) < 0) {
-            errors.add("El stock disponible no puede ser negativo");
-        }
-
-        if (request.stockTotal() != null && request.stockDisponible() != null &&
-                request.stockDisponible().compareTo(request.stockTotal()) > 0) {
-            errors.add("El stock disponible no puede ser mayor al stock total");
         }
 
         // Descripcion

@@ -49,8 +49,6 @@ public class ItemService {
         item.setNombre(request.nombre());
         item.setDescripcion(request.descripcion());
         item.setCodigoItem(request.codigoItem());
-        item.setStockTotal(request.stockInicial());
-        item.setStockDisponible(request.stockInicial());
         item.setEnabled(true);
         item.setObservaciones(request.observaciones());
 
@@ -67,8 +65,6 @@ public class ItemService {
         item.setTipo(request.tipo());
         item.setNombre(request.nombre());
         item.setDescripcion(request.descripcion());
-        item.setStockTotal(request.stockTotal());
-        item.setStockDisponible(request.stockDisponible());
         item.setEnabled(request.enabled());
         item.setObservaciones(request.observaciones());
 
@@ -145,8 +141,6 @@ public class ItemService {
             row.createCell(1).setCellValue(item.getTipo().name());
             row.createCell(2).setCellValue(item.getNombre());
             row.createCell(3).setCellValue(item.getCodigoItem());
-            row.createCell(4).setCellValue(item.getStockTotal().doubleValue());
-            row.createCell(5).setCellValue(item.getStockDisponible().doubleValue());
             row.createCell(6).setCellValue(item.isEnabled());
             row.createCell(7).setCellValue(item.getObservaciones());
         }
@@ -206,8 +200,6 @@ public class ItemService {
             row.createCell(1).setCellValue(item.getTipo().name());
             row.createCell(2).setCellValue(item.getNombre());
             row.createCell(3).setCellValue(item.getCodigoItem());
-            row.createCell(4).setCellValue(item.getStockTotal().doubleValue());
-            row.createCell(5).setCellValue(item.getStockDisponible().doubleValue());
             row.createCell(6).setCellValue(item.isEnabled());
             row.createCell(7).setCellValue(item.getObservaciones());
 

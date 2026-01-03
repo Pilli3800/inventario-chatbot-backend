@@ -11,8 +11,6 @@ public record ItemDto(
         String nombre,
         String descripcion,
         String codigoItem,
-        BigDecimal stockTotal,
-        BigDecimal stockDisponible,
         boolean enabled,
         String observaciones
 ) {
@@ -24,8 +22,6 @@ public record ItemDto(
                 item.getNombre(),
                 item.getDescripcion(),
                 item.getCodigoItem(),
-                item.getStockTotal(),
-                item.getStockDisponible(),
                 item.isEnabled(),
                 item.getObservaciones()
         );

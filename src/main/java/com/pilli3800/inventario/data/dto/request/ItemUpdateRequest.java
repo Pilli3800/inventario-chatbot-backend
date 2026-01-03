@@ -8,8 +8,6 @@ public record ItemUpdateRequest(
         String nombre,
         String descripcion,
         TipoItem tipo,
-        BigDecimal stockTotal,
-        BigDecimal stockDisponible,
         Boolean enabled,
         String observaciones
 ) { }
