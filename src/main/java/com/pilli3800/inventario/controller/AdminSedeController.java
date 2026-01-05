@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/admin/sedes")
 @PreAuthorize("hasRole('ADMINISTRACION')")
@@ -19,25 +17,6 @@ import java.util.List;
 public class AdminSedeController {
 
     private final SedeService sedeService;
-
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public SingleResponse<List<SedeDto>> getSedes() {
-        return new SingleResponse<>(
-                200,
-                "/sedes",
-                sedeService.getSedes()
-        );
-    }
-    @GetMapping("/activas")
-    @ResponseStatus(HttpStatus.OK)
-    public SingleResponse<List<SedeDto>> getSedesActivas() {
-        return new SingleResponse<>(
-                200,
-                "/sedes/activas",
-                sedeService.getSedesAtivas()
-        );
-    }
 
     @GetMapping("/{codigoSede}")
     @ResponseStatus(HttpStatus.OK)
