@@ -34,4 +34,15 @@ public class InventarioSede extends RegistroAuditoria {
 
     @Column(nullable = false)
     private Long stock = 0L;
+
+    public void sumarStock(Long cantidad) {
+        this.stock += cantidad;
+    }
+
+    public void restarStock(Long cantidad) {
+        if (this.stock < cantidad) {
+            throw new IllegalStateException("Stock insuficiente");
+        }
+        this.stock -= cantidad;
+    }
 }

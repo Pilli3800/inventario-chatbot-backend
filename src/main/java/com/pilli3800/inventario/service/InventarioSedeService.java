@@ -54,7 +54,7 @@ public class InventarioSedeService {
         InventarioSede inventario = new InventarioSede();
         inventario.setItem(item);
         inventario.setSede(sede);
-        // stock = 0 por defecto
+        inventario.setStock(0L);
 
         inventarioSedeRepository.save(inventario);
     }
@@ -192,6 +192,27 @@ public class InventarioSedeService {
         workbook.close();
 
         return out.toByteArray();
+    }
+
+    public InventarioSede obtenerExistente(Item item, Sede sede) {
+        return inventarioSedeRepository
+                .findByItemIdAndSedeId(item.getId(), sede.getId())
+                .orElseThrow(() -> new RuntimeException(
+                        "El item no está asignado a la sede origen"
+                ));
+    }
+
+    public InventarioSede obtenerOcrear(Item item, Sede sede) {
+
+        return inventarioSedeRepository
+                .findByItemIdAndSedeId(item.getId(), sede.getId())
+                .orElseGet(() -> {
+                    InventarioSede nuevo = new InventarioSede();
+                    nuevo.setItem(item);
+                    nuevo.setSede(sede);
+                    nuevo.setStock(0L);
+                    return inventarioSedeRepository.save(nuevo);
+                });
     }
 
 }
