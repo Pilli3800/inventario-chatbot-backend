@@ -62,9 +62,15 @@ public class UserSpecifications {
                 );
             }
 
-            if (request.identUsuario() != null) {
+            if (request.identUsuario() != null && !request.identUsuario().isBlank()) {
+
+                String ident = request.identUsuario().toLowerCase();
+
                 predicates.add(
-                        cb.equal(root.get("identUsuario"), request.identUsuario())
+                        cb.like(
+                                cb.lower(root.get("identUsuario")),
+                                "%" + ident + "%"
+                        )
                 );
             }
 
