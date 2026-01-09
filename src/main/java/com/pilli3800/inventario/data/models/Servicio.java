@@ -2,7 +2,6 @@ package com.pilli3800.inventario.data.models;
 
 import com.pilli3800.inventario.data.models.auditoria.RegistroAuditoria;
 import com.pilli3800.inventario.data.models.auditoria.RegistroAuditoriaListener;
-import com.pilli3800.inventario.data.models.user.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,24 +9,23 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @EntityListeners(RegistroAuditoriaListener.class)
-@Table(name = "cuadrillas")
+@Table(name = "servicios")
 @Data
-public class Cuadrilla extends RegistroAuditoria {
+public class Servicio extends RegistroAuditoria {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_cuadrilla")
+    @Column(name = "id_servicio")
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 8)
-    private String codigoCuadrilla;
+    @Column(unique = true, nullable = false,  length = 8)
+    private String codigo;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "jefe_cuadrilla_id", nullable = false)
-    private User jefeCuadrilla;
+    @Column(nullable = false)
+    private String nombre;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "servicio_id", nullable = false)
-    private Servicio servicio;
+    private String descripcion;
 
     private boolean enabled = true;
+
 }

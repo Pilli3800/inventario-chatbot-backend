@@ -4,6 +4,7 @@ import com.pilli3800.inventario.data.dto.request.cuadrilla.CuadrillaCreateReques
 import com.pilli3800.inventario.data.models.user.User;
 import com.pilli3800.inventario.exception.ValidationException;
 import com.pilli3800.inventario.repository.CuadrillaRepository;
+import com.pilli3800.inventario.repository.ServicioRepository;
 import com.pilli3800.inventario.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,7 @@ public class CuadrillaValidator {
 
     private final CuadrillaRepository cuadrillaRepository;
     private final UserRepository userRepository;
+    private final ServicioRepository servicioRepository;
 
     public void validate(CuadrillaCreateRequest request) {
 
@@ -46,6 +48,11 @@ public class CuadrillaValidator {
             if (!usuario.isEnabled()) {
                 errors.add("El usuario está deshabilitado");
             }
+        }
+
+        // Servicio
+        if (!servicioRepository.existsByCodigo(request.codigoServicio())) {
+            errors.add("El servicio no existe");
         }
 
         if (!errors.isEmpty()) {

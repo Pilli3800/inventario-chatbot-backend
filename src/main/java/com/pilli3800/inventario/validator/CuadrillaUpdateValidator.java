@@ -2,9 +2,11 @@ package com.pilli3800.inventario.validator;
 
 import com.pilli3800.inventario.data.dto.request.cuadrilla.CuadrillaUpdateRequest;
 import com.pilli3800.inventario.data.models.Cuadrilla;
+import com.pilli3800.inventario.data.models.Servicio;
 import com.pilli3800.inventario.data.models.user.User;
 import com.pilli3800.inventario.exception.ValidationException;
 import com.pilli3800.inventario.repository.CuadrillaRepository;
+import com.pilli3800.inventario.repository.ServicioRepository;
 import com.pilli3800.inventario.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -18,12 +20,13 @@ public class CuadrillaUpdateValidator {
 
     private final CuadrillaRepository cuadrillaRepository;
     private final UserRepository userRepository;
+    private final ServicioRepository servicioRepository;
 
     public void validate(String codigoCuadrilla, CuadrillaUpdateRequest request) {
 
         List<String> errors = new ArrayList<>();
 
-        // 1️⃣ Cuadrilla existe
+        // Cuadrilla existe
         Cuadrilla cuadrilla = cuadrillaRepository
                 .findByCodigoCuadrilla(codigoCuadrilla)
                 .orElse(null);
@@ -33,7 +36,7 @@ public class CuadrillaUpdateValidator {
             throw new ValidationException(errors);
         }
 
-        // 2️⃣ Cambio de jefe de cuadrilla
+        // Cambio de jefe de cuadrilla
         if (request.codigoUsuario() != null) {
 
             User usuario = userRepository
@@ -57,7 +60,23 @@ public class CuadrillaUpdateValidator {
             }
         }
 
-        // 3️⃣ Cambio de estado (enabled)
+        // Servicio
+        if (request.codigoServicio() != null) {
+
+            Servicio servicio = servicioRepository
+                    .findByCodigo(request.codigoServicio())
+                    .orElse(null);
+
+            if (servicio == null) {
+                errors.add("El servicio no existe");
+            }
+
+            if (servicio != null && !servicio.isEnabled()) {
+                errors.add("El servicio está deshabilitado");
+            }
+        }
+
+        // Cambio de estado (enabled)
         if (request.enabled() != null) {
 
             // No desactivar si ya está desactivada
@@ -71,7 +90,7 @@ public class CuadrillaUpdateValidator {
                     && !cuadrilla.getJefeCuadrilla().isEnabled()) {
 
                 errors.add(
-                        "No se puede activar la cuadrilla porque el jefe está deshabilitado"
+                        "No se puede activar la cuadrilla porque el jefe de cuadrilla está deshabilitado"
                 );
             }
         }

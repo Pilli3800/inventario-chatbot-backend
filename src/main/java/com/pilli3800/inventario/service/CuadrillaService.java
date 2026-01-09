@@ -5,8 +5,10 @@ import com.pilli3800.inventario.data.dto.request.cuadrilla.CuadrillaSearchReques
 import com.pilli3800.inventario.data.dto.request.cuadrilla.CuadrillaUpdateRequest;
 import com.pilli3800.inventario.data.dto.response.CuadrillaDto;
 import com.pilli3800.inventario.data.models.Cuadrilla;
+import com.pilli3800.inventario.data.models.Servicio;
 import com.pilli3800.inventario.data.models.user.User;
 import com.pilli3800.inventario.repository.CuadrillaRepository;
+import com.pilli3800.inventario.repository.ServicioRepository;
 import com.pilli3800.inventario.repository.UserRepository;
 import com.pilli3800.inventario.specifications.CuadrillaSpecifications;
 import com.pilli3800.inventario.validator.CuadrillaUpdateValidator;
@@ -31,6 +33,7 @@ public class CuadrillaService {
     private final CuadrillaValidator cuadrillaValidator;
     private final UserRepository userRepository;
     private final CuadrillaUpdateValidator cuadrillaUpdateValidator;
+    private final ServicioRepository servicioRepository;
 
     public CuadrillaDto getCuadrilla(String codigoCuadrilla) {
         return cuadrillaRepository.findByCodigoCuadrilla(codigoCuadrilla).map(CuadrillaDto::from).orElseThrow(() -> new RuntimeException("Cuadrilla no encontrada"));
@@ -52,6 +55,9 @@ public class CuadrillaService {
         User usuario = userRepository.findByIdentUsuario(request.codigoUsuario()).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         cuadrilla.setJefeCuadrilla(usuario);
 
+        Servicio servicio = servicioRepository.findByCodigo(request.codigoServicio()).orElseThrow(() -> new RuntimeException("Servicio no encontrado"));
+        cuadrilla.setServicio(servicio);
+
         return CuadrillaDto.from(cuadrillaRepository.save(cuadrilla));
     }
 
@@ -65,7 +71,7 @@ public class CuadrillaService {
 
     private void setCuadrillaEnabled(String codigoCuadrilla, boolean enabled) {
         Cuadrilla cuadrilla = cuadrillaRepository.findByCodigoCuadrilla(codigoCuadrilla)
-                .orElseThrow(() -> new RuntimeException("Item no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Cuadrilla no encontrada"));
 
         cuadrilla.setEnabled(enabled);
         cuadrillaRepository.save(cuadrilla);
@@ -93,6 +99,15 @@ public class CuadrillaService {
 
         if (request.enabled() != null) {
             cuadrilla.setEnabled(request.enabled());
+        }
+
+        if (request.codigoServicio() != null) {
+
+            Servicio nuevoServicio = servicioRepository
+                    .findByCodigo(request.codigoServicio())
+                    .get();
+
+            cuadrilla.setServicio(nuevoServicio);
         }
 
         return CuadrillaDto.from(cuadrilla);

@@ -32,7 +32,7 @@ public class ItemValidator {
 
         // Nombre obligatorio
         if (request.nombre() == null || request.nombre().isBlank()) {
-            errors.add("El nombre del item es obligatorio");
+            errors.add("El nombreServicio del item es obligatorio");
         }
 
         if (!errors.isEmpty()) {

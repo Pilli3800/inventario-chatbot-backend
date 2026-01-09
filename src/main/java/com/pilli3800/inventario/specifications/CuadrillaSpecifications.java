@@ -20,8 +20,16 @@ public class CuadrillaSpecifications {
 
             // Código cuadrilla
             if (request.codigoCuadrilla() != null && !request.codigoCuadrilla().isBlank()) {
+
+                String codigo = request.codigoCuadrilla()
+                        .toLowerCase()
+                        .trim();
+
                 predicates.add(
-                        cb.equal(root.get("codigoCuadrilla"), request.codigoCuadrilla())
+                        cb.like(
+                                cb.lower(root.get("codigoCuadrilla")),
+                                "%" + codigo + "%"
+                        )
                 );
             }
 

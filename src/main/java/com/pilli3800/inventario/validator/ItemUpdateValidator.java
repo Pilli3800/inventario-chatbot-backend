@@ -17,12 +17,12 @@ public class ItemUpdateValidator {
         List<String> errors = new ArrayList<>();
 
         if (request.nombre() != null && request.nombre().isBlank()) {
-            errors.add("El nombre del item no puede estar vacío");
+            errors.add("El nombreServicio del item no puede estar vacío");
         }
 
         // Descripcion
         if (request.descripcion().length() > 255) {
-            errors.add("La descripcion del item es muy larga, maximo 255 caracteres");
+            errors.add("La descripcionServicio del item es muy larga, maximo 255 caracteres");
         }
 
         // Observaciones

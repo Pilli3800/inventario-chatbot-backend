@@ -5,6 +5,7 @@ import com.pilli3800.inventario.data.models.Cuadrilla;
 public record CuadrillaDto(
         Long id,
         String codigoCuadrilla,
+        String codigoServicio,
         Long jefeCuadrillaId,
         String jefeCuadrillaUsuario,
         boolean enabled
@@ -14,6 +15,7 @@ public record CuadrillaDto(
         return new CuadrillaDto(
                 cuadrilla.getId(),
                 cuadrilla.getCodigoCuadrilla(),
+                cuadrilla.getServicio().getCodigo(),
                 cuadrilla.getJefeCuadrilla().getId(),
                 cuadrilla.getJefeCuadrilla().getIdentUsuario(),
                 cuadrilla.isEnabled()
