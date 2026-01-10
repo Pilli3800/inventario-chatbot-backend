@@ -4,15 +4,11 @@ import com.pilli3800.inventario.data.dto.request.RegisterRequest;
 import com.pilli3800.inventario.data.dto.request.ResetPasswordRequest;
 import com.pilli3800.inventario.data.dto.request.UserSearchRequest;
 import com.pilli3800.inventario.data.dto.request.UserUpdateRequest;
-import com.pilli3800.inventario.data.dto.response.general.PageResponse;
-import com.pilli3800.inventario.data.dto.response.general.SingleResponse;
 import com.pilli3800.inventario.data.dto.response.UserDto;
+import com.pilli3800.inventario.data.dto.response.general.SingleResponse;
 import com.pilli3800.inventario.service.AdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,45 +21,14 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/api/admin/users")
 @PreAuthorize("hasRole('ADMINISTRACION')")
 @RequiredArgsConstructor
 public class AdminUserController {
 
     private final AdminService adminService;
 
-    @GetMapping("/users/{identUsuario}")
-    @ResponseStatus(HttpStatus.OK)
-    public SingleResponse<UserDto> getUser(@PathVariable String  identUsuario) {
-        return new SingleResponse<>(
-                200,
-                "/users/{identUsuario}",
-                adminService.getUser(identUsuario)
-        );
-    }
-
-    @GetMapping("/users")
-    @ResponseStatus(HttpStatus.OK)
-    public PageResponse<UserDto> search(
-            @RequestParam(required = false) String nombres,
-            @RequestParam(required = false) String apellidos,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) String identUsuario,
-            @RequestParam(required = false) String dni,
-            @RequestParam(required = false) Boolean enabled,
-            @RequestParam(required = false) String rol,
-            @PageableDefault(page = 0, size = 5, sort = "nombres") Pageable pageable
-    ) {
-        UserSearchRequest request = new UserSearchRequest(
-                nombres, apellidos, email, identUsuario, dni, enabled, rol
-        );
-
-        Page<UserDto> page = adminService.getUsers(request, pageable);
-
-        return PageResponse.from(page);
-    }
-
-    @PostMapping("/users")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public SingleResponse<UserDto> createUser(@Valid @RequestBody RegisterRequest request) {
         return new SingleResponse<>(
@@ -73,7 +38,7 @@ public class AdminUserController {
         );
     }
 
-    @PutMapping("/users/{identUsuario}")
+    @PutMapping("/{identUsuario}")
     @ResponseStatus(HttpStatus.OK)
     public SingleResponse<UserDto> updateUser(
             @PathVariable String identUsuario,
@@ -86,21 +51,21 @@ public class AdminUserController {
         );
     }
 
-    @PatchMapping("/users/{identUsuario}/desactivar")
+    @PatchMapping("/{identUsuario}/desactivar")
     @ResponseStatus(HttpStatus.OK)
     public SingleResponse<String> disableUser(@PathVariable String identUsuario) {
         adminService.disableUser(identUsuario);
         return new SingleResponse<>(200, "/api/admin/users/" + identUsuario + "/desactivar", "Usuario desactivado");
     }
 
-    @PatchMapping("/users/{identUsuario}/activar")
+    @PatchMapping("/{identUsuario}/activar")
     @ResponseStatus(HttpStatus.OK)
     public SingleResponse<String> enableUser(@PathVariable String identUsuario) {
         adminService.enableUser(identUsuario);
         return new SingleResponse<>(200, "/api/admin/users/" + identUsuario + "/activar", "Usuario activado");
     }
 
-    @PatchMapping("/users/{identUsuario}/password")
+    @PatchMapping("/{identUsuario}/password")
     @ResponseStatus(HttpStatus.OK)
     public SingleResponse<String> resetPassword(
             @PathVariable String identUsuario,
@@ -114,7 +79,7 @@ public class AdminUserController {
         );
     }
 
-    @GetMapping("/users/export/excel")
+    @GetMapping("/export/excel")
     public ResponseEntity<byte[]> exportUsersExcel(
             @RequestParam(required = false) String nombres,
             @RequestParam(required = false) String apellidos,
