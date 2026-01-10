@@ -1,16 +1,19 @@
 package com.pilli3800.inventario.service;
 
+import com.pilli3800.inventario.data.dto.request.InventarioSedeSearchRequest;
 import com.pilli3800.inventario.data.dto.request.cuadrilla.CuadrillaCreateRequest;
 import com.pilli3800.inventario.data.dto.request.cuadrilla.CuadrillaSearchRequest;
 import com.pilli3800.inventario.data.dto.request.cuadrilla.CuadrillaUpdateRequest;
 import com.pilli3800.inventario.data.dto.response.CuadrillaDto;
 import com.pilli3800.inventario.data.models.Cuadrilla;
+import com.pilli3800.inventario.data.models.InventarioSede;
 import com.pilli3800.inventario.data.models.Servicio;
 import com.pilli3800.inventario.data.models.user.User;
 import com.pilli3800.inventario.repository.CuadrillaRepository;
 import com.pilli3800.inventario.repository.ServicioRepository;
 import com.pilli3800.inventario.repository.UserRepository;
 import com.pilli3800.inventario.specifications.CuadrillaSpecifications;
+import com.pilli3800.inventario.specifications.InventarioSedeSpecifications;
 import com.pilli3800.inventario.validator.CuadrillaUpdateValidator;
 import com.pilli3800.inventario.validator.CuadrillaValidator;
 import jakarta.transaction.Transactional;
@@ -169,6 +172,99 @@ public class CuadrillaService {
         }
 
         for (int i = 0; i <= 4; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        workbook.write(out);
+        workbook.close();
+
+        return out.toByteArray();
+    }
+
+    public byte[] exportCuadrillasToExcelAuditoria(CuadrillaSearchRequest request) throws IOException {
+
+        Specification<Cuadrilla> spec = CuadrillaSpecifications.search(request);
+        List<Cuadrilla> cuadrillas = cuadrillaRepository.findAll(spec);
+
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Cuadrillas Auditoría");
+
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+
+        Row header = sheet.createRow(0);
+
+        String[] headers = {
+                "ID",
+                "Código Cuadrilla",
+                "Usuario Jefe",
+                "Nombre Jefe",
+                "Servicio",
+                "Activo",
+                "Fecha Creación",
+                "Usuario Creación",
+                "Fecha Actualización",
+                "Usuario Actualización"
+        };
+
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = header.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        int rowIdx = 1;
+        for (Cuadrilla cuadrilla : cuadrillas) {
+
+            Row row = sheet.createRow(rowIdx++);
+
+            row.createCell(0).setCellValue(cuadrilla.getId());
+            row.createCell(1).setCellValue(cuadrilla.getCodigoCuadrilla());
+
+            row.createCell(2).setCellValue(
+                    cuadrilla.getJefeCuadrilla().getIdentUsuario()
+            );
+
+            row.createCell(3).setCellValue(
+                    cuadrilla.getJefeCuadrilla().getNombres() + " " +
+                            cuadrilla.getJefeCuadrilla().getApellidos()
+            );
+
+            row.createCell(4).setCellValue(
+                    cuadrilla.getServicio().getCodigo()
+            );
+
+            row.createCell(5).setCellValue(cuadrilla.isEnabled());
+
+            row.createCell(6).setCellValue(
+                    cuadrilla.getFcCreacion() != null
+                            ? cuadrilla.getFcCreacion().toString()
+                            : ""
+            );
+
+            row.createCell(7).setCellValue(
+                    cuadrilla.getUsuCreacion() != null
+                            ? cuadrilla.getUsuCreacion()
+                            : ""
+            );
+
+            row.createCell(8).setCellValue(
+                    cuadrilla.getFcActualizacion() != null
+                            ? cuadrilla.getFcActualizacion().toString()
+                            : ""
+            );
+
+            row.createCell(9).setCellValue(
+                    cuadrilla.getUsuActualizacion() != null
+                            ? cuadrilla.getUsuActualizacion()
+                            : ""
+            );
+        }
+
+        for (int i = 0; i < headers.length; i++) {
             sheet.autoSizeColumn(i);
         }
 
