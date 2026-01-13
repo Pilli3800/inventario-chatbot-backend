@@ -1,9 +1,11 @@
 package com.pilli3800.inventario.service;
 
 import com.pilli3800.inventario.data.dto.request.movimientos.MovimientoInventarioSearchRequest;
-import com.pilli3800.inventario.data.dto.response.StockMovidoPorItemDto;
 import com.pilli3800.inventario.data.dto.response.MovimientoInventarioDto;
+import com.pilli3800.inventario.data.dto.response.StockMovidoPorItemDto;
+import com.pilli3800.inventario.data.models.Cuadrilla;
 import com.pilli3800.inventario.data.models.MovimientoInventario;
+import com.pilli3800.inventario.repository.CuadrillaRepository;
 import com.pilli3800.inventario.repository.MovimientoInventarioRepository;
 import com.pilli3800.inventario.specifications.MovimientoInventarioSpecifications;
 import lombok.RequiredArgsConstructor;
@@ -24,16 +26,53 @@ import java.util.List;
 public class MovimientoHistoricoService {
 
     private final MovimientoInventarioRepository movimientoInventarioRepository;
+    private final CuadrillaRepository cuadrillaRepository;
 
-    public Page<MovimientoInventarioDto> getMovimientos(MovimientoInventarioSearchRequest request, Pageable pageable) {
+    public MovimientoInventarioDto getMovimiento(
+            Long id,
+            boolean esJefeCuadrilla,
+            String usuarioIdent
+    ) {
+
+        MovimientoInventario movimiento = movimientoInventarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Movimiento no encontrado"));
+
+        if (esJefeCuadrilla) {
+            if (!movimiento.getUsuario().getIdentUsuario().equals(usuarioIdent)) {
+                throw new RuntimeException("No tiene permiso para ver este movimiento");
+            }
+        }
+
+        return MovimientoInventarioDto.from(movimiento);
+    }
+
+    public Page<MovimientoInventarioDto> getMovimientos(
+            MovimientoInventarioSearchRequest request,
+            Pageable pageable
+    ) {
 
         Specification<MovimientoInventario> spec =
                 MovimientoInventarioSpecifications.search(request);
 
-        Page<MovimientoInventario> page =
-                movimientoInventarioRepository.findAll(spec, pageable);
+        // 🔥 resolver cuadrilla SOLO AQUÍ
+        if (request.codigoCuadrilla() != null && !request.codigoCuadrilla().isBlank()) {
 
-        return page.map(MovimientoInventarioDto::from);
+            Cuadrilla cuadrilla = cuadrillaRepository
+                    .findByCodigoCuadrilla(request.codigoCuadrilla())
+                    .orElseThrow(() ->
+                            new IllegalArgumentException(
+                                    "No existe cuadrilla con código " + request.codigoCuadrilla()
+                            )
+                    );
+
+            spec = spec.and(
+                    MovimientoInventarioSpecifications.byCuadrillaId(cuadrilla.getId())
+            );
+        }
+
+        return movimientoInventarioRepository
+                .findAll(spec, pageable)
+                .map(MovimientoInventarioDto::from);
     }
 
     public byte[] exportHistoricoToExcel(MovimientoInventarioSearchRequest request) throws IOException {

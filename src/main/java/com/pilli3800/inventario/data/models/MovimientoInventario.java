@@ -46,7 +46,7 @@ public class MovimientoInventario extends RegistroAuditoria {
     @Column(length = 500)
     private String observaciones;
 
-    // Extensiones futuras
-    // @ManyToOne private Cuadrilla cuadrilla;
-    // @ManyToOne private Servicio servicio;
+    @ManyToOne
+    @JoinColumn(name = "cuadrilla_id")
+    private Cuadrilla cuadrilla;
 }

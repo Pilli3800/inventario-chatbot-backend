@@ -6,9 +6,11 @@ import java.time.LocalDate;
 
 public record MovimientoInventarioSearchRequest(
         String codigoItem,
-        String sedeCodigo,
+        String sedeOrigen,
+        String sedeDestino,
         TipoMovimiento tipoMovimiento,
         String usuario,
+        String codigoCuadrilla,
         LocalDate fechaDesde,
         LocalDate fechaHasta
-) { }
+) {}

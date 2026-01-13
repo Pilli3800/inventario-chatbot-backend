@@ -12,76 +12,57 @@ import java.util.List;
 
 public class MovimientoInventarioSpecifications {
 
-    public static Specification<MovimientoInventario> search(MovimientoInventarioSearchRequest request) {
+    public static Specification<MovimientoInventario> search(
+            MovimientoInventarioSearchRequest request
+    ) {
 
         return (root, query, cb) -> {
 
             List<Predicate> predicates = new ArrayList<>();
-            query.distinct(true);
 
-            // Tipo de movimiento
+            // Tipo movimiento
             if (request.tipoMovimiento() != null) {
                 predicates.add(
-                        cb.equal(
-                                root.get("tipoMovimiento"),
-                                request.tipoMovimiento()
-                        )
+                        cb.equal(root.get("tipoMovimiento"), request.tipoMovimiento())
                 );
             }
 
             // Usuario
             if (request.usuario() != null && !request.usuario().isBlank()) {
                 predicates.add(
-                        cb.like(
+                        cb.equal(
                                 cb.lower(root.get("usuario").get("identUsuario")),
-                                "%" + request.usuario().toLowerCase() + "%"
+                                request.usuario().toLowerCase()
                         )
                 );
             }
 
-            // Item (desde inventario origen o destino)
-            if (request.codigoItem() != null && !request.codigoItem().isBlank()) {
+            Join<Object, Object> invOrigen =
+                    root.join("inventarioOrigen", JoinType.LEFT);
+            Join<Object, Object> invDestino =
+                    root.join("inventarioDestino", JoinType.LEFT);
 
-                Join<Object, Object> invOrigen =
-                        root.join("inventarioOrigen", JoinType.LEFT);
-                Join<Object, Object> invDestino =
-                        root.join("inventarioDestino", JoinType.LEFT);
-
-                Predicate origenItem = cb.equal(
-                        invOrigen.get("item").get("codigoItem"),
-                        request.codigoItem()
+            // SEDE ORIGEN
+            if (request.sedeOrigen() != null && !request.sedeOrigen().isBlank()) {
+                predicates.add(
+                        cb.equal(
+                                invOrigen.get("sede").get("codigo"),
+                                request.sedeOrigen()
+                        )
                 );
-
-                Predicate destinoItem = cb.equal(
-                        invDestino.get("item").get("codigoItem"),
-                        request.codigoItem()
-                );
-
-                predicates.add(cb.or(origenItem, destinoItem));
             }
 
-            // Sede (origen o destino)
-            if (request.sedeCodigo() != null && !request.sedeCodigo().isBlank()) {
-
-                Join<Object, Object> invOrigen =
-                        root.join("inventarioOrigen", JoinType.LEFT);
-                Join<Object, Object> invDestino =
-                        root.join("inventarioDestino", JoinType.LEFT);
-
-                Predicate origenSede = cb.equal(
-                        invOrigen.get("sede").get("codigo"),
-                        request.sedeCodigo()
+            // SEDE DESTINO
+            if (request.sedeDestino() != null && !request.sedeDestino().isBlank()) {
+                predicates.add(
+                        cb.equal(
+                                invDestino.get("sede").get("codigo"),
+                                request.sedeDestino()
+                        )
                 );
-
-                Predicate destinoSede = cb.equal(
-                        invDestino.get("sede").get("codigo"),
-                        request.sedeCodigo()
-                );
-
-                predicates.add(cb.or(origenSede, destinoSede));
             }
 
-            // Rango de fechas
+            // Fechas
             if (request.fechaDesde() != null) {
                 predicates.add(
                         cb.greaterThanOrEqualTo(
@@ -100,7 +81,25 @@ public class MovimientoInventarioSpecifications {
                 );
             }
 
+            // Cuadrilla (solo auditoría)
+            if (request.codigoCuadrilla() != null && !request.codigoCuadrilla().isBlank()) {
+                Join<Object, Object> cuadrillaJoin =
+                        root.join("cuadrilla", JoinType.LEFT);
+
+                predicates.add(
+                        cb.equal(
+                                cuadrillaJoin.get("codigoCuadrilla"),
+                                request.codigoCuadrilla()
+                        )
+                );
+            }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    public static Specification<MovimientoInventario> byCuadrillaId(Long cuadrillaId) {
+        return (root, query, cb) ->
+                cb.equal(root.get("cuadrilla").get("id"), cuadrillaId);
     }
 }

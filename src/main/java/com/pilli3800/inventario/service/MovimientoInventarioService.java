@@ -1,6 +1,7 @@
 package com.pilli3800.inventario.service;
 
 import com.pilli3800.inventario.data.dto.request.movimientos.MovimientoInventarioCreateRequest;
+import com.pilli3800.inventario.data.models.Cuadrilla;
 import com.pilli3800.inventario.data.models.InventarioSede;
 import com.pilli3800.inventario.data.models.MovimientoInventario;
 import com.pilli3800.inventario.data.models.Sede;
@@ -27,6 +28,8 @@ public class MovimientoInventarioService {
     private final MovimientoInventarioCreateValidator createValidator;
     private final InventarioSedeService inventarioSedeService;
     private final UserService userService;
+    private final MovimientoInventarioRepository movimientoInventarioRepository;
+    private final CuadrillaRepository cuadrillaRepository;
 
     @Transactional
     public void registrarMovimiento(MovimientoInventarioCreateRequest request) {
@@ -44,13 +47,15 @@ public class MovimientoInventarioService {
                         new ValidationException(List.of("Usuario autenticado no encontrado"))
                 );
 
+        Cuadrilla cuadrilla = resolverCuadrillaSiAplica(request, usuario);
+
         validarPermisoPorTipoMovimiento(request.tipoMovimiento(), usuario);
 
         switch (request.tipoMovimiento()) {
             case ENTRADA -> procesarEntrada(request, item, usuario);
-            case SALIDA -> procesarSalida(request, item, usuario);
+            case SALIDA -> procesarSalida(request, item, usuario, cuadrilla);
             case TRANSFERENCIA -> procesarTransferencia(request, item, usuario);
-            case DEVOLUCION -> procesarDevolucion(request, item, usuario);
+            case DEVOLUCION -> procesarDevolucion(request, item, usuario, cuadrilla);
             default -> throw new ValidationException(
                     List.of("Tipo de movimiento no soportado")
             );
@@ -65,10 +70,10 @@ public class MovimientoInventarioService {
 
         destino.sumarStock(request.cantidad());
 
-        guardarMovimiento(TipoMovimiento.ENTRADA, request.cantidad(), usuario, null, destino, request.observaciones());
+        guardarMovimiento(TipoMovimiento.ENTRADA, request.cantidad(), usuario, null, destino, request.observaciones(), null);
     }
 
-    private void procesarSalida(MovimientoInventarioCreateRequest request, Item item, User usuario) {
+    private void procesarSalida(MovimientoInventarioCreateRequest request, Item item, User usuario, Cuadrilla cuadrilla) {
         Sede sedeOrigen = sedeRepository.findByCodigo(request.sedeOrigenCodigo())
                 .orElseThrow(() -> new ValidationException(List.of("La sede origen no existe")));
 
@@ -76,7 +81,7 @@ public class MovimientoInventarioService {
 
         origen.restarStock(request.cantidad());
 
-        guardarMovimiento(TipoMovimiento.SALIDA, request.cantidad(), usuario, origen, null, request.observaciones());
+        guardarMovimiento(TipoMovimiento.SALIDA, request.cantidad(), usuario, origen, null, request.observaciones(), cuadrilla);
     }
 
     private void procesarTransferencia(MovimientoInventarioCreateRequest request, Item item, User usuario) {
@@ -107,10 +112,10 @@ public class MovimientoInventarioService {
         origen.restarStock(request.cantidad());
         destino.sumarStock(request.cantidad());
 
-        guardarMovimiento(TipoMovimiento.TRANSFERENCIA, request.cantidad(), usuario, origen, destino, request.observaciones());
+        guardarMovimiento(TipoMovimiento.TRANSFERENCIA, request.cantidad(), usuario, origen, destino, request.observaciones(), null);
     }
 
-    private void procesarDevolucion(MovimientoInventarioCreateRequest request, Item item, User usuario) {
+    private void procesarDevolucion(MovimientoInventarioCreateRequest request, Item item, User usuario, Cuadrilla cuadrilla) {
         Sede sedeDestino = sedeRepository.findByCodigo(request.sedeDestinoCodigo())
                 .orElseThrow(() -> new ValidationException(List.of("La sede destino no existe")));
 
@@ -118,7 +123,7 @@ public class MovimientoInventarioService {
 
         destino.sumarStock(request.cantidad());
 
-        guardarMovimiento(TipoMovimiento.DEVOLUCION, request.cantidad(), usuario, null, destino, request.observaciones());
+        guardarMovimiento(TipoMovimiento.DEVOLUCION, request.cantidad(), usuario, null, destino, request.observaciones(), cuadrilla);
     }
 
     private void guardarMovimiento(
@@ -127,7 +132,8 @@ public class MovimientoInventarioService {
             User usuario,
             InventarioSede origen,
             InventarioSede destino,
-            String observaciones
+            String observaciones,
+            Cuadrilla cuadrilla
     ) {
         MovimientoInventario movimiento = new MovimientoInventario();
         movimiento.setTipoMovimiento(tipo);
@@ -137,6 +143,9 @@ public class MovimientoInventarioService {
         movimiento.setInventarioDestino(destino);
         movimiento.setFechaMovimiento(LocalDateTime.now());
         movimiento.setObservaciones(observaciones);
+        movimiento.setCuadrilla(cuadrilla);
+
+        movimientoInventarioRepository.save(movimiento);
     }
 
     private void validarPermisoPorTipoMovimiento(TipoMovimiento tipoMovimiento, User usuario) {
@@ -148,7 +157,7 @@ public class MovimientoInventarioService {
 
         boolean permitido = switch (tipoMovimiento) {
             case ENTRADA, TRANSFERENCIA -> esLogistica;
-            case SALIDA, DEVOLUCION -> esLogistica || esJefeCuadrilla;
+            case SALIDA, DEVOLUCION -> esJefeCuadrilla;
         };
 
         if (!permitido) {
@@ -157,5 +166,39 @@ public class MovimientoInventarioService {
             );
         }
     }
+    private Cuadrilla resolverCuadrillaSiAplica(
+            MovimientoInventarioCreateRequest request,
+            User usuario
+    ) {
+
+        if (request.tipoMovimiento() != TipoMovimiento.SALIDA
+                && request.tipoMovimiento() != TipoMovimiento.DEVOLUCION) {
+            return null;
+        }
+
+
+        Cuadrilla cuadrilla = cuadrillaRepository
+                .findByCodigoCuadrilla(request.codigoCuadrilla())
+                .orElseThrow(() ->
+                        new ValidationException(
+                                List.of("La cuadrilla no existe")
+                        )
+                );
+
+        if (!cuadrilla.isEnabled()) {
+            throw new ValidationException(
+                    List.of("La cuadrilla está desactivada")
+            );
+        }
+
+        if (!cuadrilla.getJefeCuadrilla().getId().equals(usuario.getId())) {
+            throw new ValidationException(
+                    List.of("Solo el jefe de la cuadrilla puede registrar salidas para ella")
+            );
+        }
+
+        return cuadrilla;
+    }
+
 
 }

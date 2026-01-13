@@ -23,6 +23,8 @@ public record MovimientoInventarioCreateRequest(
         @Positive
         Long cantidad,
 
-        String observaciones
+        String observaciones,
+
+        String codigoCuadrilla
 
 ) { }

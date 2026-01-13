@@ -1,6 +1,7 @@
 package com.pilli3800.inventario.validator;
 
 import com.pilli3800.inventario.data.dto.request.movimientos.MovimientoInventarioCreateRequest;
+import com.pilli3800.inventario.data.models.enums.TipoMovimiento;
 import com.pilli3800.inventario.data.models.item.Item;
 import com.pilli3800.inventario.exception.ValidationException;
 import com.pilli3800.inventario.repository.ItemRepository;
@@ -47,6 +48,13 @@ public class MovimientoInventarioCreateValidator {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             errors.add("Usuario no autenticado");
+        }
+
+        if (request.tipoMovimiento() == TipoMovimiento.SALIDA) {
+
+            if (request.codigoCuadrilla() == null || request.codigoCuadrilla().isBlank()) {
+                errors.add("La salida de inventario debe estar asociada a una cuadrilla");
+            }
         }
 
         if (!errors.isEmpty()) {

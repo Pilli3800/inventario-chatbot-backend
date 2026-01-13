@@ -15,7 +15,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/sedes")
-@PreAuthorize("hasAnyRole('LOGISTICA','ADMINISTRACION')")
 @RequiredArgsConstructor
 public class SedeController {
 

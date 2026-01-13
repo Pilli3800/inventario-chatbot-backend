@@ -26,7 +26,7 @@ import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("/api/logistica/items")
-@PreAuthorize("hasRole('LOGISTICA')")
+@PreAuthorize("hasAnyRole('LOGISTICA', 'JEFE_CUADRILLA')")
 @RequiredArgsConstructor
 public class ItemController {
 

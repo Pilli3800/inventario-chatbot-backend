@@ -13,6 +13,8 @@ public record MovimientoInventarioDto(
         String sedeOrigen,
         String sedeDestino,
         String usuario,
+        String codigoCuadrilla,
+        String servicio,
         LocalDateTime fechaMovimiento,
         String observaciones
 ) {
@@ -22,7 +24,7 @@ public record MovimientoInventarioDto(
                 entity.getId(),
                 entity.getTipoMovimiento().name(),
 
-                // Item (origen o destino según tipo)
+                // Item
                 entity.getInventarioOrigen() != null
                         ? entity.getInventarioOrigen().getItem().getCodigoItem()
                         : entity.getInventarioDestino().getItem().getCodigoItem(),
@@ -33,18 +35,33 @@ public record MovimientoInventarioDto(
 
                 entity.getCantidad(),
 
-                // Sede origen (puede ser null)
+                // Sede origen
                 entity.getInventarioOrigen() != null
                         ? entity.getInventarioOrigen().getSede().getCodigo()
                         : null,
 
-                // Sede destino (puede ser null)
+                // Sede destino
                 entity.getInventarioDestino() != null
                         ? entity.getInventarioDestino().getSede().getCodigo()
                         : null,
 
+                // Usuario
                 entity.getUsuario().getIdentUsuario(),
+
+                // Cuadrilla
+                entity.getCuadrilla() != null
+                        ? entity.getCuadrilla().getCodigoCuadrilla()
+                        : null,
+
+                // Servicio (viene de cuadrilla)
+                entity.getCuadrilla() != null
+                        ? entity.getCuadrilla().getServicio().getNombre()
+                        : null,
+
+                // Fecha
                 entity.getFechaMovimiento(),
+
+                // Observaciones
                 entity.getObservaciones()
         );
     }
