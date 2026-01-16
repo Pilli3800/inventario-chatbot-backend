@@ -53,6 +53,7 @@ public class MovimientoHistoricoController {
             @RequestParam(required = false) TipoMovimiento tipoMovimiento,
             @RequestParam(required = false) String usuario,
             @RequestParam(required = false) String codigoCuadrilla,
+            @RequestParam(required = false) String codigoServicio,
             @RequestParam(required = false) LocalDate fechaDesde,
             @RequestParam(required = false) LocalDate fechaHasta,
             @PageableDefault(page = 0, size = 10, sort = "fechaMovimiento") Pageable pageable,
@@ -74,6 +75,7 @@ public class MovimientoHistoricoController {
                         tipoMovimiento,
                         usuarioFinal,
                         codigoCuadrilla,
+                        codigoServicio,
                         fechaDesde,
                         fechaHasta
                 );
@@ -92,6 +94,7 @@ public class MovimientoHistoricoController {
             @RequestParam(required = false) TipoMovimiento tipoMovimiento,
             @RequestParam(required = false) String usuario,
             @RequestParam(required = false) String codigoCuadrilla,
+            @RequestParam(required = false) String codigoServicio,
             @RequestParam(required = false) LocalDate fechaDesde,
             @RequestParam(required = false) LocalDate fechaHasta
     ) throws IOException {
@@ -104,6 +107,7 @@ public class MovimientoHistoricoController {
                         tipoMovimiento,
                         usuario,
                         codigoCuadrilla,
+                        codigoServicio,
                         fechaDesde,
                         fechaHasta
                 );

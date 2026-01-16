@@ -18,6 +18,8 @@ public class MovimientoInventarioSpecifications {
 
         return (root, query, cb) -> {
 
+            query.distinct(true);
+
             List<Predicate> predicates = new ArrayList<>();
 
             // Tipo movimiento
@@ -41,6 +43,30 @@ public class MovimientoInventarioSpecifications {
                     root.join("inventarioOrigen", JoinType.LEFT);
             Join<Object, Object> invDestino =
                     root.join("inventarioDestino", JoinType.LEFT);
+            Join<Object, Object> itemOrigenJoin =
+                    invOrigen.join("item", JoinType.LEFT);
+
+            Join<Object, Object> itemDestinoJoin =
+                    invDestino.join("item", JoinType.LEFT);
+
+            // ITEM
+            if (request.codigoItem() != null && !request.codigoItem().isBlank()) {
+
+                String pattern = "%" + request.codigoItem().toLowerCase() + "%";
+
+                predicates.add(
+                        cb.or(
+                                cb.like(
+                                        cb.lower(itemOrigenJoin.get("codigoItem")),
+                                        pattern
+                                ),
+                                cb.like(
+                                        cb.lower(itemDestinoJoin.get("codigoItem")),
+                                        pattern
+                                )
+                        )
+                );
+            }
 
             // SEDE ORIGEN
             if (request.sedeOrigen() != null && !request.sedeOrigen().isBlank()) {
@@ -90,6 +116,23 @@ public class MovimientoInventarioSpecifications {
                         cb.equal(
                                 cuadrillaJoin.get("codigoCuadrilla"),
                                 request.codigoCuadrilla()
+                        )
+                );
+            }
+
+            // SERVICIO (a través de cuadrilla)
+            if (request.codigoServicio() != null && !request.codigoServicio().isBlank()) {
+
+                Join<Object, Object> cuadrillaJoin =
+                        root.join("cuadrilla", JoinType.LEFT);
+
+                Join<Object, Object> servicioJoin =
+                        cuadrillaJoin.join("servicio", JoinType.LEFT);
+
+                predicates.add(
+                        cb.equal(
+                                servicioJoin.get("codigo"),
+                                request.codigoServicio()
                         )
                 );
             }

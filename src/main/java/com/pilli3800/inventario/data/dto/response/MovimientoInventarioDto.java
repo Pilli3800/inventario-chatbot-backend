@@ -1,5 +1,6 @@
 package com.pilli3800.inventario.data.dto.response;
 
+import com.pilli3800.inventario.data.dto.response.general.CodigoNombreDto;
 import com.pilli3800.inventario.data.models.MovimientoInventario;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ public record MovimientoInventarioDto(
         String sedeDestino,
         String usuario,
         String codigoCuadrilla,
-        String servicio,
+        CodigoNombreDto servicio,
         LocalDateTime fechaMovimiento,
         String observaciones
 ) {
@@ -53,9 +54,12 @@ public record MovimientoInventarioDto(
                         ? entity.getCuadrilla().getCodigoCuadrilla()
                         : null,
 
-                // Servicio (viene de cuadrilla)
+                // Servicio
                 entity.getCuadrilla() != null
-                        ? entity.getCuadrilla().getServicio().getNombre()
+                        ? new CodigoNombreDto(
+                        entity.getCuadrilla().getServicio().getCodigo(),
+                        entity.getCuadrilla().getServicio().getNombre()
+                )
                         : null,
 
                 // Fecha

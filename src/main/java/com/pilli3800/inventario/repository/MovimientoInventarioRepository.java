@@ -1,8 +1,12 @@
 package com.pilli3800.inventario.repository;
 
 import com.pilli3800.inventario.data.dto.response.StockMovidoPorItemDto;
+import com.pilli3800.inventario.data.models.Cuadrilla;
 import com.pilli3800.inventario.data.models.InventarioSede;
 import com.pilli3800.inventario.data.models.MovimientoInventario;
+import com.pilli3800.inventario.data.models.enums.TipoMovimiento;
+import com.pilli3800.inventario.data.models.item.Item;
+import com.pilli3800.inventario.data.models.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MovimientoInventarioRepository extends JpaRepository<MovimientoInventario, Long>, JpaSpecificationExecutor<MovimientoInventario> {
@@ -72,5 +77,25 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
     boolean existsByInventarioOrigen(InventarioSede inventarioSede);
 
     boolean existsByInventarioDestino(InventarioSede inventarioSede);
+
+    @Query("""
+    SELECT m
+    FROM MovimientoInventario m
+    LEFT JOIN m.inventarioOrigen io
+    LEFT JOIN m.inventarioDestino id
+    WHERE m.usuario = :usuario
+      AND m.cuadrilla = :cuadrilla
+      AND (
+            io.item = :item
+         OR id.item = :item
+      )
+    ORDER BY m.fechaMovimiento DESC
+""")
+    List<MovimientoInventario> findMovimientosPorUsuarioCuadrillaItemOrdenados(
+            @Param("usuario") User usuario,
+            @Param("cuadrilla") Cuadrilla cuadrilla,
+            @Param("item") Item item
+    );
+
 
 }

@@ -11,6 +11,7 @@ public record MovimientoInventarioSearchRequest(
         TipoMovimiento tipoMovimiento,
         String usuario,
         String codigoCuadrilla,
+        String codigoServicio,
         LocalDate fechaDesde,
         LocalDate fechaHasta
 ) {}

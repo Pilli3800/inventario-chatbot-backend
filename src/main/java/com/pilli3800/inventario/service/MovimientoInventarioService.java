@@ -16,7 +16,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -116,6 +119,8 @@ public class MovimientoInventarioService {
     }
 
     private void procesarDevolucion(MovimientoInventarioCreateRequest request, Item item, User usuario, Cuadrilla cuadrilla) {
+        validarDevolucion(item, cuadrilla, usuario, request.cantidad(), request.sedeDestinoCodigo());
+
         Sede sedeDestino = sedeRepository.findByCodigo(request.sedeDestinoCodigo())
                 .orElseThrow(() -> new ValidationException(List.of("La sede destino no existe")));
 
@@ -198,6 +203,69 @@ public class MovimientoInventarioService {
         }
 
         return cuadrilla;
+    }
+
+    private void validarDevolucion(
+            Item item,
+            Cuadrilla cuadrilla,
+            User usuario,
+            Long cantidadDevolucion,
+            String sedeDestinoCodigo
+    ) {
+
+        List<MovimientoInventario> movimientos =
+                movimientoInventarioRepository
+                        .findMovimientosPorUsuarioCuadrillaItemOrdenados(
+                                usuario,
+                                cuadrilla,
+                                item
+                        );
+
+        if (movimientos.isEmpty()) {
+            throw new ValidationException(
+                    List.of("No existe ningún movimiento previo para este item y cuadrilla")
+            );
+        }
+
+        MovimientoInventario ultimoMovimiento = movimientos.getFirst();
+
+        // El último movimiento DEBE ser SALIDA
+        if (ultimoMovimiento.getTipoMovimiento() != TipoMovimiento.SALIDA) {
+            throw new ValidationException(
+                    List.of(
+                            "No se puede registrar una devolución porque el último movimiento no es una salida"
+                    )
+            );
+        }
+
+        // Validar sede de devolución (coherencia espacial)
+        Sede sedeSalida = ultimoMovimiento
+                .getInventarioOrigen()
+                .getSede();
+
+        if (!sedeSalida.getCodigo().equals(sedeDestinoCodigo)) {
+            throw new ValidationException(
+                    List.of(
+                            "La devolución debe realizarse a la misma sede desde donde se realizó la salida"
+                    )
+            );
+        }
+
+        // Cantidad > 0
+        if (cantidadDevolucion <= 0) {
+            throw new ValidationException(
+                    List.of("La cantidad a devolver debe ser mayor a cero")
+            );
+        }
+
+        // Cantidad <= última salida
+        if (cantidadDevolucion > ultimoMovimiento.getCantidad()) {
+            throw new ValidationException(
+                    List.of(
+                            "La cantidad a devolver no puede ser mayor a la cantidad de la última salida"
+                    )
+            );
+        }
     }
 
 

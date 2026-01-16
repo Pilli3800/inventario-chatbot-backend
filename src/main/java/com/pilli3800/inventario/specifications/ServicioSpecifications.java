@@ -19,7 +19,10 @@ public class ServicioSpecifications {
 
             if (request.codigo() != null && !request.codigo().isBlank()) {
                 predicates.add(
-                        cb.equal(root.get("codigo"), request.codigo())
+                        cb.like(
+                                cb.lower(root.get("codigo")),
+                                "%" + request.codigo().toLowerCase() + "%"
+                        )
                 );
             }
 
