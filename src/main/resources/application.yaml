@@ -3,10 +3,10 @@ spring:
     name: inventario
 
   datasource:
-    url: jdbc:mysql://localhost:3306/inventario_chatbot?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: root
+    url: jdbc:postgresql://localhost:5432/inventario_chatbot
+    username: postgres
     password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -14,10 +14,20 @@ spring:
     show-sql: true
     properties:
       hibernate:
+        default_schema: core
         format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 security:
   jwt:
     secret-key: "VmpzNGN5U21hVlFxZ2hRREhKZHc0ZmtlQnFRQTR0Yk9sOUVsb2c3Y2VvMUpjR1N1UWxKWFdDazUzYmdlM3Q4T1d0UXJ4UjJ0VmxHUnVjR29KcG9sQ1pYdkE5S2FhV3J4Y0hGZW5lVTRWdHdEalZlRzZ6Zk5rMWFh"
     expiration-minutes: 60
+
+spring.ai:
+  openai:
+    api-key: "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"
+    base-url: https://api.groq.com/openai
+    chat:
+      options:
+        model: openai/gpt-oss-120b
+        temperature: 0.7
