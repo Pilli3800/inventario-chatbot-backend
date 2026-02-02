@@ -8,6 +8,7 @@ public record CuadrillaDto(
         String codigoServicio,
         Long jefeCuadrillaId,
         String jefeCuadrillaUsuario,
+        String jefeCuadrillaNombresyApellidos,
         boolean enabled
 ) {
 
@@ -18,6 +19,7 @@ public record CuadrillaDto(
                 cuadrilla.getServicio().getCodigo(),
                 cuadrilla.getJefeCuadrilla().getId(),
                 cuadrilla.getJefeCuadrilla().getIdentUsuario(),
+                cuadrilla.getJefeCuadrilla().getNombres()+" "+cuadrilla.getJefeCuadrilla().getApellidos(),
                 cuadrilla.isEnabled()
         );
     }
