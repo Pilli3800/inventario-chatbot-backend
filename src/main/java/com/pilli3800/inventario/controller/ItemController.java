@@ -3,6 +3,7 @@ package com.pilli3800.inventario.controller;
 import com.pilli3800.inventario.data.dto.request.ItemCreateRequest;
 import com.pilli3800.inventario.data.dto.request.ItemSearchRequest;
 import com.pilli3800.inventario.data.dto.request.ItemUpdateRequest;
+import com.pilli3800.inventario.data.dto.response.ItemHistorialMovimientoDto;
 import com.pilli3800.inventario.data.dto.response.ItemDto;
 import com.pilli3800.inventario.data.dto.response.general.PageResponse;
 import com.pilli3800.inventario.data.dto.response.general.SingleResponse;
@@ -22,11 +23,12 @@ import org.springframework.http.ResponseEntity;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 
 @RestController
 @RequestMapping("/api/logistica/items")
-@PreAuthorize("hasAnyRole('LOGISTICA', 'JEFE_CUADRILLA')")
+//@PreAuthorize("hasAnyRole('LOGISTICA', 'JEFE_CUADRILLA')")
 @RequiredArgsConstructor
 public class ItemController {
 
@@ -39,6 +41,18 @@ public class ItemController {
                 200,
                 "/api/logistica/item/{codigoItem}",
                 itemService.getItem(codigoItem)
+        );
+    }
+
+    @GetMapping("/{codigoItem}/historial")
+    @ResponseStatus(HttpStatus.OK)
+    public SingleResponse<List<ItemHistorialMovimientoDto>> getHistorialItem(
+            @PathVariable String codigoItem
+    ) {
+        return new SingleResponse<>(
+                200,
+                "/api/logistica/items/" + codigoItem + "/historial",
+                itemService.getHistorialItem(codigoItem)
         );
     }
 

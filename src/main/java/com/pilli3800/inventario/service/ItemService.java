@@ -3,6 +3,7 @@ package com.pilli3800.inventario.service;
 import com.pilli3800.inventario.data.dto.request.ItemCreateRequest;
 import com.pilli3800.inventario.data.dto.request.ItemSearchRequest;
 import com.pilli3800.inventario.data.dto.request.ItemUpdateRequest;
+import com.pilli3800.inventario.data.dto.response.ItemHistorialMovimientoDto;
 import com.pilli3800.inventario.data.dto.response.ItemDto;
 import com.pilli3800.inventario.data.models.item.Item;
 import com.pilli3800.inventario.repository.ItemRepository;
@@ -32,6 +33,21 @@ public class ItemService {
 
     public ItemDto getItem(String codigoItem) {
         return itemRepository.findByCodigoItem(codigoItem).map(ItemDto::from).orElseThrow(() -> new RuntimeException("Item no encontrado"));
+    }
+
+    public List<ItemHistorialMovimientoDto> getHistorialItem(String codigoItem) {
+        itemRepository.findByCodigoItem(codigoItem)
+                .orElseThrow(() -> new RuntimeException("Item no encontrado"));
+
+        return itemRepository.findHistorialMovimientosPorCodigoItem(codigoItem)
+                .stream()
+                .map(ItemHistorialMovimientoDto::from)
+                .toList();
+    }
+
+    public Item getItemById(Long id) {
+        return itemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Item no encontrado"));
     }
 
     public Page<ItemDto> getItems(ItemSearchRequest request, Pageable pageable) {
