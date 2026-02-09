@@ -5,6 +5,7 @@ import com.pilli3800.inventario.data.models.enums.TipoMovimiento;
 import com.pilli3800.inventario.data.models.item.Item;
 import com.pilli3800.inventario.exception.ValidationException;
 import com.pilli3800.inventario.repository.ItemRepository;
+import com.pilli3800.inventario.util.TextNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,8 +35,9 @@ public class MovimientoInventarioCreateValidator {
         }
 
         // Item existe y activo
+        String codigoItem = TextNormalizer.normalizeCode(request.codigoItem());
         Item item = itemRepository
-                .findByCodigoItem(request.codigoItem())
+                .findByCodigoItem(codigoItem)
                 .orElse(null);
 
         if (item == null) {

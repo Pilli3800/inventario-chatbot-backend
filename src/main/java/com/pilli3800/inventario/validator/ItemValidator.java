@@ -3,6 +3,7 @@ package com.pilli3800.inventario.validator;
 import com.pilli3800.inventario.data.dto.request.ItemCreateRequest;
 import com.pilli3800.inventario.exception.ValidationException;
 import com.pilli3800.inventario.repository.ItemRepository;
+import com.pilli3800.inventario.util.TextNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,8 @@ public class ItemValidator {
         List<String> errors = new ArrayList<>();
 
         // Código único
-        if (itemRepository.existsByCodigoItem(request.codigoItem())) {
+        String codigoItem = TextNormalizer.normalizeCode(request.codigoItem());
+        if (itemRepository.existsByCodigoItem(codigoItem)) {
             errors.add("El código de item ya existe");
         }
 

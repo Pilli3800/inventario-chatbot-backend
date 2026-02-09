@@ -7,6 +7,7 @@ import com.pilli3800.inventario.exception.ValidationException;
 import com.pilli3800.inventario.repository.InventarioSedeRepository;
 import com.pilli3800.inventario.repository.ItemRepository;
 import com.pilli3800.inventario.repository.SedeRepository;
+import com.pilli3800.inventario.util.TextNormalizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,8 @@ public class InventarioSedeValidator {
 
         List<String> errors = new ArrayList<>();
 
-        Item item = itemRepository.findByCodigoItem(request.codigoItem())
+        String codigoItem = TextNormalizer.normalizeCode(request.codigoItem());
+        Item item = itemRepository.findByCodigoItem(codigoItem)
                 .orElse(null);
 
         if (item == null) {

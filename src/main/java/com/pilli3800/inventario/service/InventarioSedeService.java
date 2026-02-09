@@ -10,6 +10,7 @@ import com.pilli3800.inventario.repository.InventarioSedeRepository;
 import com.pilli3800.inventario.repository.ItemRepository;
 import com.pilli3800.inventario.repository.SedeRepository;
 import com.pilli3800.inventario.specifications.InventarioSedeSpecifications;
+import com.pilli3800.inventario.util.TextNormalizer;
 import com.pilli3800.inventario.validator.InventarioSedeDeleteValidator;
 import com.pilli3800.inventario.validator.InventarioSedeValidator;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +49,8 @@ public class InventarioSedeService {
 
         inventarioSedeValidator.validate(request);
 
-        Item item = itemRepository.findByCodigoItem(request.codigoItem()).get();
+        String codigoItem = TextNormalizer.normalizeCode(request.codigoItem());
+        Item item = itemRepository.findByCodigoItem(codigoItem).get();
         Sede sede = sedeRepository.findByCodigo(request.sedeCodigo()).get();
 
         InventarioSede inventario = new InventarioSede();

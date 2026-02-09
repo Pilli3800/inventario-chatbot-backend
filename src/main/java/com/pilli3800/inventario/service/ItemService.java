@@ -8,6 +8,7 @@ import com.pilli3800.inventario.data.dto.response.ItemDto;
 import com.pilli3800.inventario.data.models.item.Item;
 import com.pilli3800.inventario.repository.ItemRepository;
 import com.pilli3800.inventario.specifications.ItemSpecifications;
+import com.pilli3800.inventario.util.TextNormalizer;
 import com.pilli3800.inventario.validator.ItemUpdateValidator;
 import com.pilli3800.inventario.validator.ItemValidator;
 import lombok.RequiredArgsConstructor;
@@ -32,14 +33,18 @@ public class ItemService {
     private final ItemUpdateValidator itemUpdateValidator;
 
     public ItemDto getItem(String codigoItem) {
-        return itemRepository.findByCodigoItem(codigoItem).map(ItemDto::from).orElseThrow(() -> new RuntimeException("Item no encontrado"));
+        String codigoNormalizado = TextNormalizer.normalizeCode(codigoItem);
+        return itemRepository.findByCodigoItem(codigoNormalizado)
+                .map(ItemDto::from)
+                .orElseThrow(() -> new RuntimeException("Item no encontrado"));
     }
 
     public List<ItemHistorialMovimientoDto> getHistorialItem(String codigoItem) {
-        itemRepository.findByCodigoItem(codigoItem)
+        String codigoNormalizado = TextNormalizer.normalizeCode(codigoItem);
+        itemRepository.findByCodigoItem(codigoNormalizado)
                 .orElseThrow(() -> new RuntimeException("Item no encontrado"));
 
-        return itemRepository.findHistorialMovimientosPorCodigoItem(codigoItem)
+        return itemRepository.findHistorialMovimientosPorCodigoItem(codigoNormalizado)
                 .stream()
                 .map(ItemHistorialMovimientoDto::from)
                 .toList();
@@ -64,7 +69,7 @@ public class ItemService {
         item.setTipo(request.tipo());
         item.setNombre(request.nombre());
         item.setDescripcion(request.descripcion());
-        item.setCodigoItem(request.codigoItem());
+        item.setCodigoItem(TextNormalizer.normalizeCode(request.codigoItem()));
         item.setEnabled(true);
         item.setObservaciones(request.observaciones());
 
@@ -73,7 +78,8 @@ public class ItemService {
 
     public ItemDto updateItem(String codigoItem, ItemUpdateRequest request) {
 
-        Item item = itemRepository.findByCodigoItem(codigoItem)
+        String codigoNormalizado = TextNormalizer.normalizeCode(codigoItem);
+        Item item = itemRepository.findByCodigoItem(codigoNormalizado)
                 .orElseThrow(() -> new RuntimeException("Item no encontrado"));
 
         itemUpdateValidator.validate(item.getId(), request);
@@ -88,7 +94,8 @@ public class ItemService {
     }
 
     private void setItemEnabled(String codigoItem, boolean enabled) {
-        Item item = itemRepository.findByCodigoItem(codigoItem)
+        String codigoNormalizado = TextNormalizer.normalizeCode(codigoItem);
+        Item item = itemRepository.findByCodigoItem(codigoNormalizado)
                 .orElseThrow(() -> new RuntimeException("Item no encontrado"));
 
         item.setEnabled(enabled);

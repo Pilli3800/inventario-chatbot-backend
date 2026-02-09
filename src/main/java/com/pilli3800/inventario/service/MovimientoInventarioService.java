@@ -10,16 +10,14 @@ import com.pilli3800.inventario.data.models.item.Item;
 import com.pilli3800.inventario.data.models.user.User;
 import com.pilli3800.inventario.exception.ValidationException;
 import com.pilli3800.inventario.repository.*;
+import com.pilli3800.inventario.util.TextNormalizer;
 import com.pilli3800.inventario.validator.MovimientoInventarioCreateValidator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +36,8 @@ public class MovimientoInventarioService {
     public void registrarMovimiento(MovimientoInventarioCreateRequest request) {
         createValidator.validate(request);
 
-        Item item = itemRepository.findByCodigoItem(request.codigoItem())
+        String codigoItem = TextNormalizer.normalizeCode(request.codigoItem());
+        Item item = itemRepository.findByCodigoItem(codigoItem)
                 .orElseThrow(() -> new ValidationException(List.of("El item no existe")));
 
         String identUsuario = userService.getIdentUsuario();
