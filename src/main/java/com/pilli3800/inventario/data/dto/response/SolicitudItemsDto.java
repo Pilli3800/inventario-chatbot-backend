@@ -41,7 +41,7 @@ public record SolicitudItemsDto(
                 solicitud.getCuadrilla().getCodigoCuadrilla(),
                 solicitud.getCuadrilla().getJefeCuadrilla().getIdentUsuario(),
                 nombreCompleto(solicitud.getCuadrilla().getJefeCuadrilla()),
-                solicitud.getSedeOrigen().getCodigo(),
+                codigoSede(solicitud),
                 solicitud.getEstado(),
                 solicitud.getObservaciones(),
                 solicitud.getObservacionesAprobacion(),
@@ -73,6 +73,10 @@ public record SolicitudItemsDto(
 
     private static String codigoUsuario(User usuario) {
         return usuario != null ? usuario.getIdentUsuario() : null;
+    }
+
+    private static String codigoSede(SolicitudItems solicitud) {
+        return solicitud.getSedeOrigen() != null ? solicitud.getSedeOrigen().getCodigo() : null;
     }
 }
 

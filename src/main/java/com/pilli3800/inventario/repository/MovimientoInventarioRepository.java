@@ -3,8 +3,8 @@ package com.pilli3800.inventario.repository;
 import com.pilli3800.inventario.data.dto.response.StockMovidoPorItemDto;
 import com.pilli3800.inventario.data.models.Cuadrilla;
 import com.pilli3800.inventario.data.models.InventarioSede;
+import com.pilli3800.inventario.data.models.InventarioServicio;
 import com.pilli3800.inventario.data.models.MovimientoInventario;
-import com.pilli3800.inventario.data.models.enums.TipoMovimiento;
 import com.pilli3800.inventario.data.models.item.Item;
 import com.pilli3800.inventario.data.models.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface MovimientoInventarioRepository extends JpaRepository<MovimientoInventario, Long>, JpaSpecificationExecutor<MovimientoInventario> {
@@ -29,7 +28,9 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
         FROM MovimientoInventario m
         LEFT JOIN m.inventarioOrigen io
         LEFT JOIN m.inventarioDestino id
-        JOIN Item i ON (i = io.item OR i = id.item)
+        LEFT JOIN m.inventarioServicioOrigen iso
+        LEFT JOIN m.inventarioServicioDestino isd
+        JOIN Item i ON (i = io.item OR i = id.item OR i = iso.item OR i = isd.item)
         WHERE
             (:fecha IS NULL OR DATE(m.fechaMovimiento) = :fecha)
         AND (:fechaDesde IS NULL OR m.fechaMovimiento >= :fechaDesde)
@@ -56,7 +57,9 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
     FROM MovimientoInventario m
     LEFT JOIN m.inventarioOrigen io
     LEFT JOIN m.inventarioDestino id
-    JOIN Item i ON (i = io.item OR i = id.item)
+    LEFT JOIN m.inventarioServicioOrigen iso
+    LEFT JOIN m.inventarioServicioDestino isd
+    JOIN Item i ON (i = io.item OR i = id.item OR i = iso.item OR i = isd.item)
     WHERE i.codigoItem = :codigoItem
       AND (:fecha IS NULL OR DATE(m.fechaMovimiento) = :fecha)
       AND (:fechaDesde IS NULL OR m.fechaMovimiento >= :fechaDesde)
@@ -78,16 +81,24 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
 
     boolean existsByInventarioDestino(InventarioSede inventarioSede);
 
+    boolean existsByInventarioServicioOrigen(InventarioServicio inventarioServicio);
+
+    boolean existsByInventarioServicioDestino(InventarioServicio inventarioServicio);
+
     @Query("""
     SELECT m
     FROM MovimientoInventario m
     LEFT JOIN m.inventarioOrigen io
     LEFT JOIN m.inventarioDestino id
+    LEFT JOIN m.inventarioServicioOrigen iso
+    LEFT JOIN m.inventarioServicioDestino isd
     WHERE m.usuario = :usuario
       AND m.cuadrilla = :cuadrilla
       AND (
             io.item = :item
          OR id.item = :item
+         OR iso.item = :item
+         OR isd.item = :item
       )
     ORDER BY m.fechaMovimiento DESC
 """)

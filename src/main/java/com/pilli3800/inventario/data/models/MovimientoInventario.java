@@ -22,7 +22,7 @@ public class MovimientoInventario extends RegistroAuditoria {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 30)
     private TipoMovimiento tipoMovimiento;
 
     @Column(nullable = false)
@@ -43,10 +43,29 @@ public class MovimientoInventario extends RegistroAuditoria {
     @JoinColumn(name = "inventario_destino_id")
     private InventarioSede inventarioDestino;
 
+    @ManyToOne
+    @JoinColumn(name = "inventario_servicio_origen_id")
+    private InventarioServicio inventarioServicioOrigen;
+
+    @ManyToOne
+    @JoinColumn(name = "inventario_servicio_destino_id")
+    private InventarioServicio inventarioServicioDestino;
+
     @Column(length = 500)
     private String observaciones;
 
     @ManyToOne
     @JoinColumn(name = "cuadrilla_id")
     private Cuadrilla cuadrilla;
+
+    @ManyToOne
+    @JoinColumn(name = "proveedor_id")
+    private Proveedor proveedor;
+
+    @ManyToOne
+    @JoinColumn(name = "factura_compra_id")
+    private FacturaCompra facturaCompra;
+
+    @Column(name = "numero_factura", length = 50)
+    private String numeroFactura;
 }

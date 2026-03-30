@@ -31,4 +31,5 @@ public class MovimientoInventarioController {
                 "Movimiento de inventario registrado correctamente"
         );
     }
+
 }

@@ -26,7 +26,7 @@ import java.time.format.DateTimeFormatter;
 @RestController
 @RequestMapping("/api/logistica/inventarios")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('LOGISTICA')")
+@PreAuthorize("isAuthenticated() and !hasRole('JEFE_CUADRILLA')")
 public class InventarioSedeController {
 
     private final InventarioSedeService inventarioSedeService;

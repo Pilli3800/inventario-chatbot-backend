@@ -34,8 +34,8 @@ public class SolicitudItems extends RegistroAuditoria {
     @JoinColumn(name = "solicitante_id", nullable = false)
     private User solicitante;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "sede_origen_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "sede_origen_id")
     private Sede sedeOrigen;
 
     @Enumerated(EnumType.STRING)

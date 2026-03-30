@@ -52,10 +52,75 @@ public class MovimientoInventarioCreateValidator {
             errors.add("Usuario no autenticado");
         }
 
-        if (request.tipoMovimiento() == TipoMovimiento.SALIDA) {
+        if (request.tipoMovimiento() == TipoMovimiento.ENTRADA) {
+            if (request.sedeDestinoCodigo() == null || request.sedeDestinoCodigo().isBlank()) {
+                errors.add("La entrada debe indicar sede destino");
+            }
+        }
+
+        if (request.tipoMovimiento() == TipoMovimiento.SALIDA
+                || request.tipoMovimiento() == TipoMovimiento.SALIDA_CUADRILLA
+                || request.tipoMovimiento() == TipoMovimiento.DEVOLUCION) {
 
             if (request.codigoCuadrilla() == null || request.codigoCuadrilla().isBlank()) {
-                errors.add("La salida de inventario debe estar asociada a una cuadrilla");
+                errors.add("La salida o devolucion debe estar asociada a una cuadrilla");
+            }
+        }
+
+        if (request.tipoMovimiento() == TipoMovimiento.SALIDA) {
+            if (request.sedeOrigenCodigo() == null || request.sedeOrigenCodigo().isBlank()) {
+                errors.add("La salida debe indicar sede origen");
+            }
+        }
+
+        if (request.tipoMovimiento() == TipoMovimiento.TRANSFERENCIA) {
+            boolean tieneSedeDestino = request.sedeDestinoCodigo() != null && !request.sedeDestinoCodigo().isBlank();
+            boolean tieneSedeOrigen = request.sedeOrigenCodigo() != null && !request.sedeOrigenCodigo().isBlank();
+
+            if (!tieneSedeOrigen) {
+                errors.add("La transferencia debe indicar sede origen");
+            }
+            if (!tieneSedeDestino) {
+                errors.add("La transferencia debe indicar sede destino");
+            }
+            if (request.codigoServicio() != null && !request.codigoServicio().isBlank()) {
+                errors.add("La transferencia entre sedes no debe indicar servicio");
+            }
+        }
+
+        if (request.tipoMovimiento() == TipoMovimiento.TRANSFERENCIA_SERVICIO) {
+            boolean tieneSedeOrigen = request.sedeOrigenCodigo() != null && !request.sedeOrigenCodigo().isBlank();
+            boolean tieneServicio = request.codigoServicio() != null && !request.codigoServicio().isBlank();
+
+            if (!tieneSedeOrigen) {
+                errors.add("La transferencia a servicio debe indicar sede origen");
+            }
+            if (!tieneServicio) {
+                errors.add("La transferencia a servicio debe indicar servicio destino");
+            }
+            if (request.sedeDestinoCodigo() != null && !request.sedeDestinoCodigo().isBlank()) {
+                errors.add("La transferencia a servicio no debe indicar sede destino");
+            }
+        }
+
+        if (request.tipoMovimiento() == TipoMovimiento.RETORNO_A_SEDE) {
+            if (request.codigoServicio() == null || request.codigoServicio().isBlank()) {
+                errors.add("El retorno a sede debe indicar servicio origen");
+            }
+            if (request.sedeDestinoCodigo() == null || request.sedeDestinoCodigo().isBlank()) {
+                errors.add("El retorno a sede debe indicar sede destino");
+            }
+            if (request.codigoCuadrilla() != null && !request.codigoCuadrilla().isBlank()) {
+                errors.add("El retorno a sede no debe indicar cuadrilla");
+            }
+        }
+
+        if (request.tipoMovimiento() == TipoMovimiento.DEVOLUCION) {
+            if (request.codigoCuadrilla() == null || request.codigoCuadrilla().isBlank()) {
+                errors.add("La devolucion debe indicar cuadrilla");
+            }
+            if (request.sedeDestinoCodigo() != null && !request.sedeDestinoCodigo().isBlank()) {
+                errors.add("La devolucion no debe indicar sede destino");
             }
         }
 

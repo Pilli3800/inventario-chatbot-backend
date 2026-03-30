@@ -48,6 +48,14 @@ public class MovimientoInventarioSpecifications {
 
             Join<Object, Object> itemDestinoJoin =
                     invDestino.join("item", JoinType.LEFT);
+            Join<Object, Object> invServicioOrigen =
+                    root.join("inventarioServicioOrigen", JoinType.LEFT);
+            Join<Object, Object> invServicioDestino =
+                    root.join("inventarioServicioDestino", JoinType.LEFT);
+            Join<Object, Object> itemServicioOrigenJoin =
+                    invServicioOrigen.join("item", JoinType.LEFT);
+            Join<Object, Object> itemServicioDestinoJoin =
+                    invServicioDestino.join("item", JoinType.LEFT);
 
             // ITEM
             if (request.codigoItem() != null && !request.codigoItem().isBlank()) {
@@ -62,6 +70,14 @@ public class MovimientoInventarioSpecifications {
                                 ),
                                 cb.like(
                                         cb.lower(itemDestinoJoin.get("codigoItem")),
+                                        pattern
+                                ),
+                                cb.like(
+                                        cb.lower(itemServicioOrigenJoin.get("codigoItem")),
+                                        pattern
+                                ),
+                                cb.like(
+                                        cb.lower(itemServicioDestinoJoin.get("codigoItem")),
                                         pattern
                                 )
                         )
@@ -130,9 +146,19 @@ public class MovimientoInventarioSpecifications {
                         cuadrillaJoin.join("servicio", JoinType.LEFT);
 
                 predicates.add(
-                        cb.equal(
-                                servicioJoin.get("codigo"),
-                                request.codigoServicio()
+                        cb.or(
+                                cb.equal(
+                                        servicioJoin.get("codigo"),
+                                        request.codigoServicio()
+                                ),
+                                cb.equal(
+                                        invServicioOrigen.get("servicio").get("codigo"),
+                                        request.codigoServicio()
+                                ),
+                                cb.equal(
+                                        invServicioDestino.get("servicio").get("codigo"),
+                                        request.codigoServicio()
+                                )
                         )
                 );
             }

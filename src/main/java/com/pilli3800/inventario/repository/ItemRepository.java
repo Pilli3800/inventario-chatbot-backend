@@ -26,7 +26,14 @@ public interface ItemRepository extends JpaRepository<Item, Long>, JpaSpecificat
         FROM MovimientoInventario m
         LEFT JOIN m.inventarioOrigen io
         LEFT JOIN m.inventarioDestino idst
-        WHERE (io.item.codigoItem = :codigoItem OR idst.item.codigoItem = :codigoItem)
+        LEFT JOIN m.inventarioServicioOrigen iso
+        LEFT JOIN m.inventarioServicioDestino isd
+        WHERE (
+                io.item.codigoItem = :codigoItem
+                OR idst.item.codigoItem = :codigoItem
+                OR iso.item.codigoItem = :codigoItem
+                OR isd.item.codigoItem = :codigoItem
+        )
         ORDER BY m.fechaMovimiento DESC
     """)
     List<MovimientoInventario> findHistorialMovimientosPorCodigoItem(

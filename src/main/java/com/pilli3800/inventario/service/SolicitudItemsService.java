@@ -3,7 +3,7 @@ package com.pilli3800.inventario.service;
 import com.pilli3800.inventario.data.dto.request.solicituditems.*;
 import com.pilli3800.inventario.data.dto.response.SolicitudItemsDto;
 import com.pilli3800.inventario.data.models.Cuadrilla;
-import com.pilli3800.inventario.data.models.InventarioSede;
+import com.pilli3800.inventario.data.models.InventarioServicio;
 import com.pilli3800.inventario.data.models.MovimientoInventario;
 import com.pilli3800.inventario.data.models.Sede;
 import com.pilli3800.inventario.data.models.enums.EstadoSolicitudItems;
@@ -38,8 +38,9 @@ public class SolicitudItemsService {
     private final CuadrillaRepository cuadrillaRepository;
     private final SedeRepository sedeRepository;
     private final ItemRepository itemRepository;
-    private final InventarioSedeRepository inventarioSedeRepository;
+    private final InventarioServicioRepository inventarioServicioRepository;
     private final MovimientoInventarioRepository movimientoInventarioRepository;
+    private final ValeSalidaService valeSalidaService;
 
     public Page<SolicitudItemsDto> getSolicitudes(
             SolicitudItemsSearchRequest request,
@@ -120,6 +121,12 @@ public class SolicitudItemsService {
                         new ValidationException(List.of("La sede origen no existe"))
                 );
 
+        if (!sedeOrigen.isEnabled()) {
+            throw new ValidationException(
+                    List.of("La sede origen esta desactivada")
+            );
+        }
+
         SolicitudItems solicitud = new SolicitudItems();
         solicitud.setCuadrilla(cuadrilla);
         solicitud.setSolicitante(solicitante);
@@ -161,8 +168,9 @@ public class SolicitudItemsService {
         }
 
         User usuarioAprobacion = obtenerUsuarioAutenticado();
-        Map<Long, InventarioSede> inventariosPorItem = new LinkedHashMap<>();
+        Map<Long, InventarioServicio> inventariosPorItem = new LinkedHashMap<>();
         List<String> erroresStock = new ArrayList<>();
+        Long servicioId = solicitud.getCuadrilla().getServicio().getId();
 
         List<SolicitudItemsDetalle> detallesOrdenados =
                 solicitud.getDetalles()
@@ -171,22 +179,22 @@ public class SolicitudItemsService {
                         .toList();
 
         for (SolicitudItemsDetalle detalle : detallesOrdenados) {
-            InventarioSede inventario = inventarioSedeRepository
-                    .findByItemIdAndSedeId(
-                            detalle.getItem().getId(),
-                            solicitud.getSedeOrigen().getId()
+            InventarioServicio inventario = inventarioServicioRepository
+                    .findByServicioIdAndItemId(
+                            servicioId,
+                            detalle.getItem().getId()
                     )
                     .orElseThrow(() -> new ValidationException(
-                            List.of("El item no esta asignado a la sede origen: "
+                            List.of("El item no esta asignado al inventario del servicio: "
                                     + detalle.getItem().getCodigoItem())
                     ));
 
-            if (inventario.getStock() < detalle.getCantidad()) {
+            if (inventario.getStockActual() < detalle.getCantidad()) {
                 erroresStock.add(
                         "Stock insuficiente para el item: "
                                 + detalle.getItem().getCodigoItem()
                                 + " (solicitado: " + detalle.getCantidad()
-                                + ", stock: " + inventario.getStock() + ")"
+                                + ", stock: " + inventario.getStockActual() + ")"
                 );
             }
 
@@ -198,7 +206,7 @@ public class SolicitudItemsService {
         }
 
         for (SolicitudItemsDetalle detalle : detallesOrdenados) {
-            InventarioSede inventario =
+            InventarioServicio inventario =
                     inventariosPorItem.get(detalle.getItem().getId());
             inventario.restarStock(detalle.getCantidad());
 
@@ -260,7 +268,8 @@ public class SolicitudItemsService {
         solicitud.setFechaEntrega(LocalDateTime.now());
         solicitud.setUsuarioEntrega(obtenerUsuarioAutenticado());
 
-        solicitudItemsRepository.save(solicitud);
+        SolicitudItems solicitudEntregada = solicitudItemsRepository.save(solicitud);
+        valeSalidaService.generarValeSiNoExiste(solicitudEntregada);
     }
 
     private SolicitudItems obtenerSolicitudPorId(Long id) {
@@ -285,17 +294,18 @@ public class SolicitudItemsService {
 
     private void registrarSalida(
             SolicitudItemsDetalle detalle,
-            InventarioSede inventarioOrigen,
+            InventarioServicio inventarioServicioOrigen,
             Cuadrilla cuadrilla,
             User usuario,
             Long idSolicitud
     ) {
         MovimientoInventario movimiento = new MovimientoInventario();
-        movimiento.setTipoMovimiento(TipoMovimiento.SALIDA);
+        movimiento.setTipoMovimiento(TipoMovimiento.SALIDA_CUADRILLA);
         movimiento.setCantidad(detalle.getCantidad());
         movimiento.setUsuario(usuario);
-        movimiento.setInventarioOrigen(inventarioOrigen);
+        movimiento.setInventarioServicioOrigen(inventarioServicioOrigen);
         movimiento.setInventarioDestino(null);
+        movimiento.setInventarioOrigen(null);
         movimiento.setFechaMovimiento(LocalDateTime.now());
         movimiento.setObservaciones("Salida por aprobacion de solicitud " + idSolicitud);
         movimiento.setCuadrilla(cuadrilla);

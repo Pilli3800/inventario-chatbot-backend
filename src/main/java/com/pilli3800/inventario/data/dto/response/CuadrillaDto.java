@@ -6,6 +6,7 @@ public record CuadrillaDto(
         Long id,
         String codigoCuadrilla,
         String codigoServicio,
+        String nombreServicio,
         Long jefeCuadrillaId,
         String jefeCuadrillaUsuario,
         String jefeCuadrillaNombresyApellidos,
@@ -17,9 +18,10 @@ public record CuadrillaDto(
                 cuadrilla.getId(),
                 cuadrilla.getCodigoCuadrilla(),
                 cuadrilla.getServicio().getCodigo(),
+                cuadrilla.getServicio().getNombre(),
                 cuadrilla.getJefeCuadrilla().getId(),
                 cuadrilla.getJefeCuadrilla().getIdentUsuario(),
-                cuadrilla.getJefeCuadrilla().getNombres()+" "+cuadrilla.getJefeCuadrilla().getApellidos(),
+                cuadrilla.getJefeCuadrilla().getNombres() + " " + cuadrilla.getJefeCuadrilla().getApellidos(),
                 cuadrilla.isEnabled()
         );
     }

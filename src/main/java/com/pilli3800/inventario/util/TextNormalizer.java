@@ -1,8 +1,10 @@
 package com.pilli3800.inventario.util;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public final class TextNormalizer {
 
-    private TextNormalizer() {}
 
     public static String normalize(String text) {
         if (text == null) return "";
