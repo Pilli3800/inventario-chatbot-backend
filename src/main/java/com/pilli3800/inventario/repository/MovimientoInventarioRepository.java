@@ -108,5 +108,35 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
             @Param("item") Item item
     );
 
+    @Query("""
+    SELECT m
+    FROM MovimientoInventario m
+    LEFT JOIN m.inventarioOrigen io
+    LEFT JOIN m.inventarioDestino id
+    LEFT JOIN m.inventarioServicioOrigen iso
+    LEFT JOIN m.inventarioServicioDestino isd
+    JOIN Item i ON (i = io.item OR i = id.item OR i = iso.item OR i = isd.item)
+    WHERE i = :item
+    ORDER BY m.fechaMovimiento DESC
+""")
+    List<MovimientoInventario> findUltimosMovimientosPorItem(
+            @Param("item") Item item
+    );
+
+    @Query("""
+    SELECT m
+    FROM MovimientoInventario m
+    LEFT JOIN m.inventarioOrigen io
+    LEFT JOIN m.inventarioDestino id
+    LEFT JOIN m.inventarioServicioOrigen iso
+    LEFT JOIN m.inventarioServicioDestino isd
+    JOIN Item i ON (i = io.item OR i = id.item OR i = iso.item OR i = isd.item)
+    WHERE i = :item
+    ORDER BY m.fechaMovimiento DESC
+""")
+    List<MovimientoInventario> findHistorialMovimientosPorItem(
+            @Param("item") Item item
+    );
+
 
 }

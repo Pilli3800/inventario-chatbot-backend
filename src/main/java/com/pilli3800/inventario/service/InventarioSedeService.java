@@ -6,6 +6,7 @@ import com.pilli3800.inventario.data.dto.response.InventarioSedeDto;
 import com.pilli3800.inventario.data.models.InventarioSede;
 import com.pilli3800.inventario.data.models.Sede;
 import com.pilli3800.inventario.data.models.item.Item;
+import com.pilli3800.inventario.exception.ValidationException;
 import com.pilli3800.inventario.repository.InventarioSedeRepository;
 import com.pilli3800.inventario.repository.ItemRepository;
 import com.pilli3800.inventario.repository.SedeRepository;
@@ -43,6 +44,16 @@ public class InventarioSedeService {
         return inventarioSedeRepository
                 .findAll(spec, pageable)
                 .map(InventarioSedeDto::from);
+    }
+
+    public Long obtenerStockPorSede(String sedeCodigo, String codigoItem) {
+        Sede sede = obtenerSede(sedeCodigo);
+        Item item = obtenerItem(codigoItem);
+
+        return inventarioSedeRepository
+                .findByItemIdAndSedeId(item.getId(), sede.getId())
+                .map(InventarioSede::getStock)
+                .orElse(0L);
     }
 
     public void asignarItemASede(InventarioSedeCreateRequest request) {
@@ -215,6 +226,18 @@ public class InventarioSedeService {
                     nuevo.setStock(0L);
                     return inventarioSedeRepository.save(nuevo);
                 });
+    }
+
+    private Sede obtenerSede(String sedeCodigo) {
+        String codigo = TextNormalizer.normalizeCode(sedeCodigo);
+        return sedeRepository.findByCodigo(codigo)
+                .orElseThrow(() -> new ValidationException(List.of("La sede no existe")));
+    }
+
+    private Item obtenerItem(String codigoItem) {
+        String codigo = TextNormalizer.normalizeCode(codigoItem);
+        return itemRepository.findByCodigoItem(codigo)
+                .orElseThrow(() -> new ValidationException(List.of("El item no existe")));
     }
 
 }

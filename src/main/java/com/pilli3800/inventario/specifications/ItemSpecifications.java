@@ -75,4 +75,40 @@ public class ItemSpecifications {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+
+    public static Specification<Item> searchByTextoInicial(String textoInicial, Boolean enabled) {
+        return (root, query, cb) -> {
+
+            List<Predicate> predicates = new ArrayList<>();
+            query.distinct(true);
+
+            if (textoInicial != null && !textoInicial.isBlank()) {
+
+                String texto = textoInicial
+                        .toLowerCase()
+                        .replaceAll("\\s+", "");
+
+                predicates.add(
+                        cb.like(
+                                cb.function(
+                                        "replace",
+                                        String.class,
+                                        cb.lower(root.get("nombre")),
+                                        cb.literal(" "),
+                                        cb.literal("")
+                                ),
+                                texto + "%"
+                        )
+                );
+            }
+
+            if (enabled != null) {
+                predicates.add(
+                        cb.equal(root.get("enabled"), enabled)
+                );
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
 }

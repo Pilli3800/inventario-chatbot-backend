@@ -25,9 +25,13 @@ security:
 
 spring.ai:
   openai:
-    api-key: "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"
+    api-key: "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"
     base-url: https://api.groq.com/openai
     chat:
       options:
         model: openai/gpt-oss-120b
         temperature: 0.7
+
+inventario:
+  chat:
+    session-retention-days: 15
