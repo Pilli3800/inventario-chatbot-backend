@@ -1,6 +1,7 @@
 package com.pilli3800.inventario.service;
 
 import com.pilli3800.inventario.data.dto.request.movimientos.MovimientoInventarioSearchRequest;
+import com.pilli3800.inventario.data.dto.response.ItemMovimientosCantidadDto;
 import com.pilli3800.inventario.data.dto.response.MovimientoInventarioDto;
 import com.pilli3800.inventario.data.dto.response.StockMovidoPorItemDto;
 import com.pilli3800.inventario.data.models.Cuadrilla;
@@ -19,11 +20,15 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class MovimientoHistoricoService {
+
+    private static final LocalDateTime FECHA_MINIMA = LocalDateTime.of(1900, 1, 1, 0, 0);
+    private static final LocalDateTime FECHA_MAXIMA = LocalDateTime.of(3000, 1, 1, 0, 0);
 
     private final MovimientoInventarioRepository movimientoInventarioRepository;
     private final CuadrillaRepository cuadrillaRepository;
@@ -143,28 +148,56 @@ public class MovimientoHistoricoService {
     }
 
     public List<StockMovidoPorItemDto> obtenerStockMovidoPorItem(
-            LocalDate fecha,
             LocalDate fechaDesde,
-            LocalDate fechaHasta,
-            Integer mes,
-            Integer anio
+            LocalDate fechaHasta
     ) {
+        FiltrosFecha filtros = filtrosFecha(fechaDesde, fechaHasta);
+
         return movimientoInventarioRepository.obtenerStockMovidoPorItem(
-                fecha, fechaDesde, fechaHasta, mes, anio
+                filtros.desde(),
+                filtros.hasta()
         );
     }
 
     public StockMovidoPorItemDto obtenerStockMovidoPorItem(
             String codigoItem,
-            LocalDate fecha,
             LocalDate fechaDesde,
-            LocalDate fechaHasta,
-            Integer mes,
-            Integer anio
+            LocalDate fechaHasta
     ) {
+        FiltrosFecha filtros = filtrosFecha(fechaDesde, fechaHasta);
+
         return movimientoInventarioRepository.obtenerStockMovidoPorItem(
-                codigoItem, fecha, fechaDesde, fechaHasta, mes, anio
+                codigoItem,
+                filtros.desde(),
+                filtros.hasta()
         );
     }
+
+    public List<ItemMovimientosCantidadDto> obtenerItemsConMasMovimientos(
+            LocalDate fechaDesde,
+            LocalDate fechaHasta
+    ) {
+        FiltrosFecha filtros = filtrosFecha(fechaDesde, fechaHasta);
+
+        return movimientoInventarioRepository.obtenerItemsConMasMovimientos(
+                filtros.desde(),
+                filtros.hasta()
+        );
+    }
+
+    private FiltrosFecha filtrosFecha(
+            LocalDate fechaDesde,
+            LocalDate fechaHasta
+    ) {
+        return new FiltrosFecha(
+                fechaDesde != null ? fechaDesde.atStartOfDay() : FECHA_MINIMA,
+                fechaHasta != null ? fechaHasta.plusDays(1).atStartOfDay() : FECHA_MAXIMA
+        );
+    }
+
+    private record FiltrosFecha(
+            LocalDateTime desde,
+            LocalDateTime hasta
+    ) {}
 
 }

@@ -1,6 +1,7 @@
 package com.pilli3800.inventario.controller;
 
 import com.pilli3800.inventario.data.dto.request.movimientos.MovimientoInventarioSearchRequest;
+import com.pilli3800.inventario.data.dto.response.ItemMovimientosCantidadDto;
 import com.pilli3800.inventario.data.dto.response.StockMovidoPorItemDto;
 import com.pilli3800.inventario.data.dto.response.general.PageResponse;
 import com.pilli3800.inventario.data.dto.response.MovimientoInventarioDto;
@@ -126,28 +127,30 @@ public class MovimientoHistoricoController {
     @GetMapping("/stock-movido")
     @ResponseStatus(HttpStatus.OK)
     public List<StockMovidoPorItemDto> getStockMovidoPorItem(
-
-            @RequestParam(required = false)
-            LocalDate fecha,
-
             @RequestParam(required = false)
             LocalDate fechaDesde,
 
             @RequestParam(required = false)
-            LocalDate fechaHasta,
-
-            @RequestParam(required = false)
-            Integer mes,
-
-            @RequestParam(required = false)
-            Integer anio
+            LocalDate fechaHasta
     ) {
         return movimientoHistoricoService.obtenerStockMovidoPorItem(
-                fecha,
                 fechaDesde,
-                fechaHasta,
-                mes,
-                anio
+                fechaHasta
+        );
+    }
+
+    @GetMapping("/items-mas-movidos")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ItemMovimientosCantidadDto> getItemsConMasMovimientos(
+            @RequestParam(required = false)
+            LocalDate fechaDesde,
+
+            @RequestParam(required = false)
+            LocalDate fechaHasta
+    ) {
+        return movimientoHistoricoService.obtenerItemsConMasMovimientos(
+                fechaDesde,
+                fechaHasta
         );
     }
 
@@ -155,14 +158,11 @@ public class MovimientoHistoricoController {
     @ResponseStatus(HttpStatus.OK)
     public StockMovidoPorItemDto getStockMovidoPorItemPorItem(
             @PathVariable String codigoItem,
-            @RequestParam(required = false) LocalDate fecha,
             @RequestParam(required = false) LocalDate fechaDesde,
-            @RequestParam(required = false) LocalDate fechaHasta,
-            @RequestParam(required = false) Integer mes,
-            @RequestParam(required = false) Integer anio
+            @RequestParam(required = false) LocalDate fechaHasta
     ) {
         return movimientoHistoricoService.obtenerStockMovidoPorItem(
-                codigoItem, fecha, fechaDesde, fechaHasta, mes, anio
+                codigoItem, fechaDesde, fechaHasta
         );
     }
 
