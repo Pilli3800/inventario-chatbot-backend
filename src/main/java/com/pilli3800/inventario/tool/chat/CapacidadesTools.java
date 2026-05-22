@@ -17,10 +17,12 @@ public class CapacidadesTools {
                 - Buscar items activos cuyo nombre empiece con un texto especifico.
                 - Buscar items por codigo exacto o parcial.
                 - Buscar items activos por tipo: MATERIAL, HERRAMIENTA o EQUIPO.
-                - Consultar consumos anómalos por cuadrilla e item.
-                - Consultar la evolución del consumo de un item en una cuadrilla.
-                - Consultar una proyección simple de consumo futuro por item.
+                - Consultar consumos anomalos por cuadrilla e item.
+                - Consultar la evolucion del consumo de un item en una cuadrilla.
+                - Consultar una proyeccion simple de consumo futuro por item.
+                - Orientar al usuario sobre la pantalla actual cuando el frontend envie contexto de pantalla.
                 - Mantener el contexto de la conversacion dentro de la sesion actual.
+                No puedo crear, modificar, aprobar, eliminar ni ejecutar acciones por el usuario.
                 No tengo permiso para ayudarte con consultas fuera del sistema o fuera de las tools disponibles.
                 """;
     }

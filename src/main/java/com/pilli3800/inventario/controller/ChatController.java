@@ -47,7 +47,9 @@ public class ChatController {
                 chatOrchestrator.chat(
                         request.message(),
                         request.sessionId(),
-                        authentication.getName()
+                        authentication.getName(),
+                        authentication.getAuthorities(),
+                        request.contextoPantalla()
                 )
         );
     }
