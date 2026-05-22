@@ -65,7 +65,8 @@ public class SolicitudItemsController {
             @RequestParam(required = false) LocalDate fechaHasta,
             @RequestParam(required = false) String servicioOrigenCodigo,
             @RequestParam(required = false) String codigoCuadrilla,
-            @RequestParam(required = false) String identUsuario
+            @RequestParam(required = false) String identUsuario,
+            @RequestParam(defaultValue = "false") boolean incluirRankingCuadrillas
     ) {
         return new SingleResponse<>(
                 200,
@@ -75,7 +76,8 @@ public class SolicitudItemsController {
                         fechaHasta,
                         servicioOrigenCodigo,
                         codigoCuadrilla,
-                        identUsuario
+                        identUsuario,
+                        incluirRankingCuadrillas
                 )
         );
     }

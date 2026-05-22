@@ -3,6 +3,7 @@ package com.pilli3800.inventario.service;
 import com.pilli3800.inventario.data.dto.request.solicituditems.*;
 import com.pilli3800.inventario.data.dto.response.SolicitudItemsDashboardDto;
 import com.pilli3800.inventario.data.dto.response.SolicitudItemsDashboardPorServicioDto;
+import com.pilli3800.inventario.data.dto.response.SolicitudItemsDashboardTopCuadrillaDto;
 import com.pilli3800.inventario.data.dto.response.SolicitudItemsDto;
 import com.pilli3800.inventario.data.dto.response.SolicitudItemsPendienteCierreDto;
 import com.pilli3800.inventario.data.models.Cuadrilla;
@@ -90,19 +91,24 @@ public class SolicitudItemsService {
             LocalDate fechaHasta,
             String servicioOrigenCodigo,
             String codigoCuadrilla,
-            String identUsuario
+            String identUsuario,
+            boolean incluirRankingCuadrillas
     ) {
         Long solicitanteId = resolverSolicitanteDashboard(identUsuario);
+        LocalDateTime fechaDesdeFiltro = fechaDesde != null ? fechaDesde.atStartOfDay() : FECHA_MINIMA;
+        LocalDateTime fechaHastaFiltro = fechaHasta != null ? fechaHasta.atTime(23, 59, 59) : FECHA_MAXIMA;
+        String servicioOrigenFiltro = servicioOrigenCodigo != null && !servicioOrigenCodigo.isBlank()
+                ? TextNormalizer.normalizeCode(servicioOrigenCodigo)
+                : null;
+        String codigoCuadrillaFiltro = codigoCuadrilla != null && !codigoCuadrilla.isBlank()
+                ? codigoCuadrilla
+                : null;
 
         List<SolicitudItems> solicitudes = solicitudItemsRepository.buscarParaDashboard(
-                fechaDesde != null ? fechaDesde.atStartOfDay() : FECHA_MINIMA,
-                fechaHasta != null ? fechaHasta.atTime(23, 59, 59) : FECHA_MAXIMA,
-                servicioOrigenCodigo != null && !servicioOrigenCodigo.isBlank()
-                        ? TextNormalizer.normalizeCode(servicioOrigenCodigo)
-                        : null,
-                codigoCuadrilla != null && !codigoCuadrilla.isBlank()
-                        ? codigoCuadrilla
-                        : null,
+                fechaDesdeFiltro,
+                fechaHastaFiltro,
+                servicioOrigenFiltro,
+                codigoCuadrillaFiltro,
                 solicitanteId
         );
 
@@ -148,6 +154,16 @@ public class SolicitudItemsService {
                 .map(entry -> toDashboardPorServicio(entry.getKey(), entry.getValue()))
                 .toList();
 
+        List<SolicitudItemsDashboardTopCuadrillaDto> topCuadrillas = incluirRankingCuadrillas
+                ? solicitudItemsRepository.buscarTopCuadrillasDashboard(
+                        fechaDesdeFiltro,
+                        fechaHastaFiltro,
+                        servicioOrigenFiltro,
+                        codigoCuadrillaFiltro,
+                        solicitanteId
+                )
+                : List.of();
+
         return new SolicitudItemsDashboardDto(
                 (long) solicitudes.size(),
                 abiertas,
@@ -160,7 +176,8 @@ public class SolicitudItemsService {
                 cerradasSinDevolucion,
                 porEstado,
                 porServicio,
-                pendientesCierre
+                pendientesCierre,
+                topCuadrillas
         );
     }
 

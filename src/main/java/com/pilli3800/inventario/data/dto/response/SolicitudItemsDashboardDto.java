@@ -17,6 +17,7 @@ public record SolicitudItemsDashboardDto(
         Long cerradasSinDevolucion,
         Map<EstadoSolicitudItems, Long> porEstado,
         List<SolicitudItemsDashboardPorServicioDto> porServicio,
-        List<SolicitudItemsPendienteCierreDto> pendientesCierre
+        List<SolicitudItemsPendienteCierreDto> pendientesCierre,
+        List<SolicitudItemsDashboardTopCuadrillaDto> topCuadrillas
 ) {
 }
