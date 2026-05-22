@@ -1,6 +1,7 @@
 package com.pilli3800.inventario.controller;
 
 import com.pilli3800.inventario.data.dto.request.solicituditems.*;
+import com.pilli3800.inventario.data.dto.response.SolicitudItemsDashboardDto;
 import com.pilli3800.inventario.data.dto.response.SolicitudItemsDto;
 import com.pilli3800.inventario.data.dto.response.general.PageResponse;
 import com.pilli3800.inventario.data.dto.response.general.SingleResponse;
@@ -33,7 +34,7 @@ public class SolicitudItemsController {
     public PageResponse<SolicitudItemsDto> getSolicitudes(
             @RequestParam(required = false) String codigoCuadrilla,
             @RequestParam(required = false) String identUsuario,
-            @RequestParam(required = false) String sedeOrigenCodigo,
+            @RequestParam(required = false) String servicioOrigenCodigo,
             @RequestParam(required = false) EstadoSolicitudItems estado,
             @RequestParam(required = false) LocalDate fechaDesde,
             @RequestParam(required = false) LocalDate fechaHasta,
@@ -44,7 +45,7 @@ public class SolicitudItemsController {
         SolicitudItemsSearchRequest request = new SolicitudItemsSearchRequest(
                 codigoCuadrilla,
                 identUsuario,
-                sedeOrigenCodigo,
+                servicioOrigenCodigo,
                 estado,
                 fechaDesde,
                 fechaHasta,
@@ -55,6 +56,28 @@ public class SolicitudItemsController {
                 solicitudItemsService.getSolicitudes(request, pageableAjustado);
 
         return PageResponse.from(page);
+    }
+
+    @GetMapping("/dashboard")
+    @ResponseStatus(HttpStatus.OK)
+    public SingleResponse<SolicitudItemsDashboardDto> getDashboard(
+            @RequestParam(required = false) LocalDate fechaDesde,
+            @RequestParam(required = false) LocalDate fechaHasta,
+            @RequestParam(required = false) String servicioOrigenCodigo,
+            @RequestParam(required = false) String codigoCuadrilla,
+            @RequestParam(required = false) String identUsuario
+    ) {
+        return new SingleResponse<>(
+                200,
+                "/api/solicitud-items/dashboard",
+                solicitudItemsService.getDashboard(
+                        fechaDesde,
+                        fechaHasta,
+                        servicioOrigenCodigo,
+                        codigoCuadrilla,
+                        identUsuario
+                )
+        );
     }
 
     @GetMapping("/{id}")
@@ -124,6 +147,34 @@ public class SolicitudItemsController {
                 200,
                 "/api/solicitud-items/" + id + "/entregar",
                 "Solicitud entregada"
+        );
+    }
+
+    @PatchMapping("/{id}/devolver")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAnyRole('LOGISTICA')")
+    public SingleResponse<SolicitudItemsDto> devolverSolicitud(
+            @PathVariable Long id,
+            @Valid @RequestBody SolicitudItemsDevolverRequest request
+    ) {
+        return new SingleResponse<>(
+                200,
+                "/api/solicitud-items/" + id + "/devolver",
+                solicitudItemsService.devolverSolicitud(id, request)
+        );
+    }
+
+    @PatchMapping("/{id}/cerrar-sin-devolucion")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAnyRole('LOGISTICA')")
+    public SingleResponse<SolicitudItemsDto> cerrarSinDevolucion(
+            @PathVariable Long id,
+            @RequestBody SolicitudItemsCerrarSinDevolucionRequest request
+    ) {
+        return new SingleResponse<>(
+                200,
+                "/api/solicitud-items/" + id + "/cerrar-sin-devolucion",
+                solicitudItemsService.cerrarSinDevolucion(id, request)
         );
     }
 

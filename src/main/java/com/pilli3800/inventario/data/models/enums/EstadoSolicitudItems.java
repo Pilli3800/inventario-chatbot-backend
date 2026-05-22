@@ -4,6 +4,8 @@ public enum EstadoSolicitudItems {
     PENDIENTE,
     APROBADA,
     RECHAZADA,
-    ENTREGADO
+    ENTREGADO,
+    DEVUELTA,
+    CERRADA_SIN_DEVOLUCION
 }
 

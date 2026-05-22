@@ -12,14 +12,18 @@ public record SolicitudItemsDto(
         String codigoCuadrilla,
         String codigoJefeCuadrilla,
         String nombreJefeCuadrilla,
-        String sedeOrigenCodigo,
+        String servicioOrigenCodigo,
         EstadoSolicitudItems estado,
         String observaciones,
         String observacionesAprobacion,
         String observacionesEntrega,
+        String observacionesDevolucion,
+        String observacionesCierre,
         LocalDateTime fechaSolicitud,
         LocalDateTime fechaAprobacion,
         LocalDateTime fechaEntrega,
+        LocalDateTime fechaDevolucion,
+        LocalDateTime fechaCierre,
         String codigoSolicitante,
         String nombreSolicitante,
         String codigoUsuarioAprobacion,
@@ -28,6 +32,10 @@ public record SolicitudItemsDto(
         String nombreUsuarioRechazo,
         String codigoUsuarioEntrega,
         String nombreUsuarioEntrega,
+        String codigoUsuarioDevolucion,
+        String nombreUsuarioDevolucion,
+        String codigoUsuarioCierre,
+        String nombreUsuarioCierre,
         List<SolicitudItemsDetalleDto> detalles
 ) {
     public static SolicitudItemsDto from(SolicitudItems solicitud) {
@@ -41,14 +49,18 @@ public record SolicitudItemsDto(
                 solicitud.getCuadrilla().getCodigoCuadrilla(),
                 solicitud.getCuadrilla().getJefeCuadrilla().getIdentUsuario(),
                 nombreCompleto(solicitud.getCuadrilla().getJefeCuadrilla()),
-                codigoSede(solicitud),
+                codigoServicio(solicitud),
                 solicitud.getEstado(),
                 solicitud.getObservaciones(),
                 solicitud.getObservacionesAprobacion(),
                 solicitud.getObservacionesEntrega(),
+                solicitud.getObservacionesDevolucion(),
+                solicitud.getObservacionesCierre(),
                 solicitud.getFcCreacion(),
                 solicitud.getFechaAprobacion(),
                 solicitud.getFechaEntrega(),
+                solicitud.getFechaDevolucion(),
+                solicitud.getFechaCierre(),
                 solicitud.getSolicitante().getIdentUsuario(),
                 nombreCompleto(solicitud.getSolicitante()),
                 codigoUsuario(solicitud.getUsuarioAprobacion()),
@@ -57,6 +69,10 @@ public record SolicitudItemsDto(
                 nombreCompleto(solicitud.getUsuarioRechazo()),
                 codigoUsuario(solicitud.getUsuarioEntrega()),
                 nombreCompleto(solicitud.getUsuarioEntrega()),
+                codigoUsuario(solicitud.getUsuarioDevolucion()),
+                nombreCompleto(solicitud.getUsuarioDevolucion()),
+                codigoUsuario(solicitud.getUsuarioCierre()),
+                nombreCompleto(solicitud.getUsuarioCierre()),
                 detalles
         );
     }
@@ -75,8 +91,8 @@ public record SolicitudItemsDto(
         return usuario != null ? usuario.getIdentUsuario() : null;
     }
 
-    private static String codigoSede(SolicitudItems solicitud) {
-        return solicitud.getSedeOrigen() != null ? solicitud.getSedeOrigen().getCodigo() : null;
+    private static String codigoServicio(SolicitudItems solicitud) {
+        return solicitud.getServicioOrigen() != null ? solicitud.getServicioOrigen().getCodigo() : null;
     }
 }
 

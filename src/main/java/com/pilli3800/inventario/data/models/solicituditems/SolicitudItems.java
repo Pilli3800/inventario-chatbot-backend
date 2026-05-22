@@ -1,7 +1,7 @@
 package com.pilli3800.inventario.data.models.solicituditems;
 
 import com.pilli3800.inventario.data.models.Cuadrilla;
-import com.pilli3800.inventario.data.models.Sede;
+import com.pilli3800.inventario.data.models.Servicio;
 import com.pilli3800.inventario.data.models.auditoria.RegistroAuditoria;
 import com.pilli3800.inventario.data.models.auditoria.RegistroAuditoriaListener;
 import com.pilli3800.inventario.data.models.enums.EstadoSolicitudItems;
@@ -34,12 +34,12 @@ public class SolicitudItems extends RegistroAuditoria {
     @JoinColumn(name = "solicitante_id", nullable = false)
     private User solicitante;
 
-    @ManyToOne
-    @JoinColumn(name = "sede_origen_id")
-    private Sede sedeOrigen;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "servicio_origen_id", nullable = false)
+    private Servicio servicioOrigen;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 30)
     private EstadoSolicitudItems estado;
 
     @Column(length = 500)
@@ -51,11 +51,23 @@ public class SolicitudItems extends RegistroAuditoria {
     @Column(length = 500)
     private String observacionesEntrega;
 
+    @Column(length = 500)
+    private String observacionesDevolucion;
+
+    @Column(length = 500)
+    private String observacionesCierre;
+
     @Column(name = "fecha_aprobacion")
     private LocalDateTime fechaAprobacion;
 
     @Column(name = "fecha_entrega")
     private LocalDateTime fechaEntrega;
+
+    @Column(name = "fecha_devolucion")
+    private LocalDateTime fechaDevolucion;
+
+    @Column(name = "fecha_cierre")
+    private LocalDateTime fechaCierre;
 
     @ManyToOne
     @JoinColumn(name = "usuario_aprobacion_id")
@@ -68,6 +80,14 @@ public class SolicitudItems extends RegistroAuditoria {
     @ManyToOne
     @JoinColumn(name = "usuario_entrega_id")
     private User usuarioEntrega;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_devolucion_id")
+    private User usuarioDevolucion;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_cierre_id")
+    private User usuarioCierre;
 
     @OneToMany(
             mappedBy = "solicitud",

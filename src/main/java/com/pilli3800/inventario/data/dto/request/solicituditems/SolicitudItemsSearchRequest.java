@@ -7,7 +7,7 @@ import java.time.LocalDate;
 public record SolicitudItemsSearchRequest(
         String codigoCuadrilla,
         String identUsuario,
-        String sedeOrigenCodigo,
+        String servicioOrigenCodigo,
         EstadoSolicitudItems estado,
         LocalDate fechaDesde,
         LocalDate fechaHasta,

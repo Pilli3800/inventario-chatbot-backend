@@ -26,8 +26,8 @@ public class SolicitudItemsCreateValidator {
             errors.add("El codigo de cuadrilla es obligatorio");
         }
 
-        if (request.sedeOrigenCodigo() == null || request.sedeOrigenCodigo().isBlank()) {
-            errors.add("El codigo de sede origen es obligatorio");
+        if (request.servicioOrigenCodigo() == null || request.servicioOrigenCodigo().isBlank()) {
+            errors.add("El codigo de servicio origen es obligatorio");
         }
 
         if (request.detalles() == null || request.detalles().isEmpty()) {

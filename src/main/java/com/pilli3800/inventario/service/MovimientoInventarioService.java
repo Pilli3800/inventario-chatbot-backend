@@ -47,6 +47,12 @@ public class MovimientoInventarioService {
     public void registrarMovimiento(MovimientoInventarioCreateRequest request) {
         createValidator.validate(request);
 
+        if (request.tipoMovimiento() == TipoMovimiento.DEVOLUCION) {
+            throw new ValidationException(
+                    List.of("La devolucion debe registrarse desde una solicitud entregada")
+            );
+        }
+
         if (request.tipoMovimiento() == TipoMovimiento.COMPRA) {
             compraCreateValidator.validate(
                     new MovimientoCompraCreateRequest(

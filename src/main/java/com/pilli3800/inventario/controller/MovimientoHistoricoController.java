@@ -2,7 +2,9 @@ package com.pilli3800.inventario.controller;
 
 import com.pilli3800.inventario.data.dto.request.movimientos.MovimientoInventarioSearchRequest;
 import com.pilli3800.inventario.data.dto.response.ItemMovimientosCantidadDto;
+import com.pilli3800.inventario.data.dto.response.MovimientoHistoricoDashboardDto;
 import com.pilli3800.inventario.data.dto.response.StockMovidoPorItemDto;
+import com.pilli3800.inventario.data.dto.response.general.SingleResponse;
 import com.pilli3800.inventario.data.dto.response.general.PageResponse;
 import com.pilli3800.inventario.data.dto.response.MovimientoInventarioDto;
 import com.pilli3800.inventario.data.models.enums.TipoMovimiento;
@@ -28,6 +30,38 @@ import java.util.List;
 public class MovimientoHistoricoController {
 
     private final MovimientoHistoricoService movimientoHistoricoService;
+
+    @GetMapping("/dashboard")
+    @ResponseStatus(HttpStatus.OK)
+    public SingleResponse<MovimientoHistoricoDashboardDto> getDashboard(
+            @RequestParam(required = false) LocalDate fechaDesde,
+            @RequestParam(required = false) LocalDate fechaHasta,
+            @RequestParam(required = false) String usuario,
+            @RequestParam(required = false) String codigoCuadrilla,
+            @RequestParam(required = false) String codigoServicio,
+            @RequestParam(defaultValue = "false") boolean porFechas,
+            Authentication authentication
+    ) {
+        boolean esJefeCuadrilla = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_JEFE_CUADRILLA"));
+
+        String usuarioFinal = esJefeCuadrilla
+                ? authentication.getName()
+                : usuario;
+
+        return new SingleResponse<>(
+                200,
+                "/api/movimientos/historico/dashboard",
+                movimientoHistoricoService.getDashboard(
+                        fechaDesde,
+                        fechaHasta,
+                        usuarioFinal,
+                        codigoCuadrilla,
+                        codigoServicio,
+                        porFechas
+                )
+        );
+    }
 
     @GetMapping("/{idMovimiento}")
     @ResponseStatus(HttpStatus.OK)

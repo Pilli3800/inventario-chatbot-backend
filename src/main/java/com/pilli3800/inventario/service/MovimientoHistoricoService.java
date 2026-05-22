@@ -2,10 +2,15 @@ package com.pilli3800.inventario.service;
 
 import com.pilli3800.inventario.data.dto.request.movimientos.MovimientoInventarioSearchRequest;
 import com.pilli3800.inventario.data.dto.response.ItemMovimientosCantidadDto;
+import com.pilli3800.inventario.data.dto.response.MovimientoHistoricoDashboardDto;
+import com.pilli3800.inventario.data.dto.response.MovimientoHistoricoDashboardFechaTipoDto;
+import com.pilli3800.inventario.data.dto.response.MovimientoHistoricoDashboardFechaDto;
+import com.pilli3800.inventario.data.dto.response.MovimientoHistoricoDashboardTipoDto;
 import com.pilli3800.inventario.data.dto.response.MovimientoInventarioDto;
 import com.pilli3800.inventario.data.dto.response.StockMovidoPorItemDto;
 import com.pilli3800.inventario.data.models.Cuadrilla;
 import com.pilli3800.inventario.data.models.MovimientoInventario;
+import com.pilli3800.inventario.data.models.enums.TipoMovimiento;
 import com.pilli3800.inventario.repository.CuadrillaRepository;
 import com.pilli3800.inventario.repository.MovimientoInventarioRepository;
 import com.pilli3800.inventario.specifications.MovimientoInventarioSpecifications;
@@ -21,7 +26,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Service
 @RequiredArgsConstructor
@@ -78,6 +87,53 @@ public class MovimientoHistoricoService {
         return movimientoInventarioRepository
                 .findAll(spec, pageable)
                 .map(MovimientoInventarioDto::from);
+    }
+
+    public MovimientoHistoricoDashboardDto getDashboard(
+            LocalDate fechaDesde,
+            LocalDate fechaHasta,
+            String usuario,
+            String codigoCuadrilla,
+            String codigoServicio,
+            boolean porFechas
+    ) {
+        FiltrosFecha filtros = filtrosFecha(fechaDesde, fechaHasta);
+        EnumMap<TipoMovimiento, Long> porTipoMovimiento = inicializarContadorTipos();
+        String usuarioFiltro = usuario != null && !usuario.isBlank() ? usuario : "%";
+        String cuadrillaFiltro = codigoCuadrilla != null && !codigoCuadrilla.isBlank() ? codigoCuadrilla : "%";
+        String servicioFiltro = codigoServicio != null && !codigoServicio.isBlank() ? codigoServicio : "%";
+
+        List<MovimientoHistoricoDashboardTipoDto> filas =
+                movimientoInventarioRepository.contarPorTipoMovimientoDashboard(
+                filtros.desde(),
+                filtros.hasta(),
+                usuarioFiltro,
+                cuadrillaFiltro,
+                servicioFiltro
+        );
+
+        for (MovimientoHistoricoDashboardTipoDto fila : filas) {
+            porTipoMovimiento.put(fila.tipoMovimiento(), fila.total());
+        }
+
+        Long total = porTipoMovimiento.values()
+                .stream()
+                .reduce(0L, Long::sum);
+
+        return new MovimientoHistoricoDashboardDto(
+                total,
+                porTipoMovimiento.get(TipoMovimiento.COMPRA),
+                porTipoMovimiento.get(TipoMovimiento.ENTRADA),
+                porTipoMovimiento.get(TipoMovimiento.SALIDA),
+                porTipoMovimiento.get(TipoMovimiento.SALIDA_CUADRILLA),
+                porTipoMovimiento.get(TipoMovimiento.DEVOLUCION),
+                porTipoMovimiento.get(TipoMovimiento.TRANSFERENCIA),
+                porTipoMovimiento.get(TipoMovimiento.TRANSFERENCIA_SERVICIO),
+                porTipoMovimiento.get(TipoMovimiento.RETORNO_A_SEDE),
+                porFechas
+                        ? obtenerDashboardPorFecha(filtros, usuarioFiltro, cuadrillaFiltro, servicioFiltro)
+                        : null
+        );
     }
 
     public byte[] exportHistoricoToExcel(MovimientoInventarioSearchRequest request) throws IOException {
@@ -193,6 +249,57 @@ public class MovimientoHistoricoService {
                 fechaDesde != null ? fechaDesde.atStartOfDay() : FECHA_MINIMA,
                 fechaHasta != null ? fechaHasta.plusDays(1).atStartOfDay() : FECHA_MAXIMA
         );
+    }
+
+    private EnumMap<TipoMovimiento, Long> inicializarContadorTipos() {
+        EnumMap<TipoMovimiento, Long> contador =
+                new EnumMap<>(TipoMovimiento.class);
+        for (TipoMovimiento tipoMovimiento : TipoMovimiento.values()) {
+            contador.put(tipoMovimiento, 0L);
+        }
+        return contador;
+    }
+
+    private List<MovimientoHistoricoDashboardFechaDto> obtenerDashboardPorFecha(
+            FiltrosFecha filtros,
+            String usuario,
+            String codigoCuadrilla,
+            String codigoServicio
+    ) {
+        Map<LocalDate, EnumMap<TipoMovimiento, Long>> contadoresPorFecha = new TreeMap<>();
+
+        List<MovimientoHistoricoDashboardFechaTipoDto> filas =
+                movimientoInventarioRepository.contarPorFechaYTipoMovimientoDashboard(
+                filtros.desde(),
+                filtros.hasta(),
+                usuario,
+                codigoCuadrilla,
+                codigoServicio
+        );
+
+        for (MovimientoHistoricoDashboardFechaTipoDto fila : filas) {
+            EnumMap<TipoMovimiento, Long> contador =
+                    contadoresPorFecha.computeIfAbsent(fila.fecha(), key -> inicializarContadorTipos());
+            contador.put(fila.tipoMovimiento(), fila.total());
+        }
+
+        List<MovimientoHistoricoDashboardFechaDto> resultado = new ArrayList<>();
+        for (Map.Entry<LocalDate, EnumMap<TipoMovimiento, Long>> entry : contadoresPorFecha.entrySet()) {
+            EnumMap<TipoMovimiento, Long> contador = entry.getValue();
+            resultado.add(new MovimientoHistoricoDashboardFechaDto(
+                    entry.getKey(),
+                    contador.get(TipoMovimiento.COMPRA),
+                    contador.get(TipoMovimiento.ENTRADA),
+                    contador.get(TipoMovimiento.SALIDA),
+                    contador.get(TipoMovimiento.SALIDA_CUADRILLA),
+                    contador.get(TipoMovimiento.DEVOLUCION),
+                    contador.get(TipoMovimiento.TRANSFERENCIA),
+                    contador.get(TipoMovimiento.TRANSFERENCIA_SERVICIO),
+                    contador.get(TipoMovimiento.RETORNO_A_SEDE)
+            ));
+        }
+
+        return resultado;
     }
 
     private record FiltrosFecha(

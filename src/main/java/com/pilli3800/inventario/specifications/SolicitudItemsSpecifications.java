@@ -42,11 +42,11 @@ public class SolicitudItemsSpecifications {
                 );
             }
 
-            if (request.sedeOrigenCodigo() != null && !request.sedeOrigenCodigo().isBlank()) {
+            if (request.servicioOrigenCodigo() != null && !request.servicioOrigenCodigo().isBlank()) {
                 predicates.add(
                         cb.equal(
-                                root.get("sedeOrigen").get("codigo"),
-                                request.sedeOrigenCodigo()
+                                root.get("servicioOrigen").get("codigo"),
+                                request.servicioOrigenCodigo()
                         )
                 );
             }

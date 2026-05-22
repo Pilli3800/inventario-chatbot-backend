@@ -3,6 +3,7 @@ package com.pilli3800.inventario.data.models;
 import com.pilli3800.inventario.data.models.auditoria.RegistroAuditoria;
 import com.pilli3800.inventario.data.models.auditoria.RegistroAuditoriaListener;
 import com.pilli3800.inventario.data.models.enums.TipoMovimiento;
+import com.pilli3800.inventario.data.models.solicituditems.SolicitudItems;
 import com.pilli3800.inventario.data.models.user.User;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -57,6 +58,10 @@ public class MovimientoInventario extends RegistroAuditoria {
     @ManyToOne
     @JoinColumn(name = "cuadrilla_id")
     private Cuadrilla cuadrilla;
+
+    @ManyToOne
+    @JoinColumn(name = "solicitud_id")
+    private SolicitudItems solicitud;
 
     @ManyToOne
     @JoinColumn(name = "proveedor_id")

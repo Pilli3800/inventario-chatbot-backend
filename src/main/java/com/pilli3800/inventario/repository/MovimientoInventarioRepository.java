@@ -1,6 +1,8 @@
 package com.pilli3800.inventario.repository;
 
 import com.pilli3800.inventario.data.dto.response.ItemMovimientosCantidadDto;
+import com.pilli3800.inventario.data.dto.response.MovimientoHistoricoDashboardFechaTipoDto;
+import com.pilli3800.inventario.data.dto.response.MovimientoHistoricoDashboardTipoDto;
 import com.pilli3800.inventario.data.dto.response.StockMovidoPorItemDto;
 import com.pilli3800.inventario.data.models.Cuadrilla;
 import com.pilli3800.inventario.data.models.InventarioSede;
@@ -150,5 +152,88 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
             @Param("item") Item item
     );
 
+    @Query("""
+    SELECT COALESCE(SUM(m.cantidad), 0)
+    FROM MovimientoInventario m
+    LEFT JOIN m.inventarioServicioDestino isd
+    WHERE m.solicitud.id = :solicitudId
+      AND m.tipoMovimiento = com.pilli3800.inventario.data.models.enums.TipoMovimiento.DEVOLUCION
+      AND isd.item = :item
+""")
+    Long sumarCantidadDevueltaPorSolicitudEItem(
+            @Param("solicitudId") Long solicitudId,
+            @Param("item") Item item
+    );
+
+    List<MovimientoInventario> findBySolicitudIdAndTipoMovimientoOrderByIdAsc(
+            Long solicitudId,
+            com.pilli3800.inventario.data.models.enums.TipoMovimiento tipoMovimiento
+    );
+
+    @Query("""
+    SELECT new com.pilli3800.inventario.data.dto.response.MovimientoHistoricoDashboardTipoDto(
+        m.tipoMovimiento,
+        COUNT(m.id)
+    )
+    FROM MovimientoInventario m
+    LEFT JOIN m.cuadrilla c
+    LEFT JOIN c.servicio cs
+    LEFT JOIN m.inventarioServicioOrigen iso
+    LEFT JOIN iso.servicio isos
+    LEFT JOIN m.inventarioServicioDestino isd
+    LEFT JOIN isd.servicio isds
+    WHERE m.fechaMovimiento >= :fechaDesde
+      AND m.fechaMovimiento <= :fechaHasta
+      AND m.usuario.identUsuario LIKE :usuario
+      AND c.codigoCuadrilla LIKE :codigoCuadrilla
+      AND (
+            :codigoServicio = '%'
+         OR cs.codigo LIKE :codigoServicio
+         OR isos.codigo LIKE :codigoServicio
+         OR isds.codigo LIKE :codigoServicio
+      )
+    GROUP BY m.tipoMovimiento
+""")
+    List<MovimientoHistoricoDashboardTipoDto> contarPorTipoMovimientoDashboard(
+            @Param("fechaDesde") LocalDateTime fechaDesde,
+            @Param("fechaHasta") LocalDateTime fechaHasta,
+            @Param("usuario") String usuario,
+            @Param("codigoCuadrilla") String codigoCuadrilla,
+            @Param("codigoServicio") String codigoServicio
+    );
+
+    @Query("""
+    SELECT new com.pilli3800.inventario.data.dto.response.MovimientoHistoricoDashboardFechaTipoDto(
+        CAST(m.fechaMovimiento AS localdate),
+        m.tipoMovimiento,
+        COUNT(m.id)
+    )
+    FROM MovimientoInventario m
+    LEFT JOIN m.cuadrilla c
+    LEFT JOIN c.servicio cs
+    LEFT JOIN m.inventarioServicioOrigen iso
+    LEFT JOIN iso.servicio isos
+    LEFT JOIN m.inventarioServicioDestino isd
+    LEFT JOIN isd.servicio isds
+    WHERE m.fechaMovimiento >= :fechaDesde
+      AND m.fechaMovimiento <= :fechaHasta
+      AND m.usuario.identUsuario LIKE :usuario
+      AND c.codigoCuadrilla LIKE :codigoCuadrilla
+      AND (
+            :codigoServicio = '%'
+         OR cs.codigo LIKE :codigoServicio
+         OR isos.codigo LIKE :codigoServicio
+         OR isds.codigo LIKE :codigoServicio
+      )
+    GROUP BY CAST(m.fechaMovimiento AS localdate), m.tipoMovimiento
+    ORDER BY CAST(m.fechaMovimiento AS localdate) ASC
+""")
+    List<MovimientoHistoricoDashboardFechaTipoDto> contarPorFechaYTipoMovimientoDashboard(
+            @Param("fechaDesde") LocalDateTime fechaDesde,
+            @Param("fechaHasta") LocalDateTime fechaHasta,
+            @Param("usuario") String usuario,
+            @Param("codigoCuadrilla") String codigoCuadrilla,
+            @Param("codigoServicio") String codigoServicio
+    );
 
 }

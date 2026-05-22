@@ -21,6 +21,7 @@ public record ItemHistorialMovimientoDto(
         String codigoProveedor,
         String nombreProveedor,
         String numeroFactura,
+        Long solicitudId,
         LocalDateTime fechaMovimiento,
         String observaciones
 ) {
@@ -91,6 +92,7 @@ public record ItemHistorialMovimientoDto(
                 codigoProveedor,
                 nombreProveedor,
                 numeroFactura,
+                entity.getSolicitud() != null ? entity.getSolicitud().getId() : null,
 
                 entity.getFechaMovimiento(),
 
