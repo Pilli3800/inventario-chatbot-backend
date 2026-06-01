@@ -3,7 +3,6 @@ package com.pilli3800.inventario.data.dto.request.movimientos;
 import com.pilli3800.inventario.data.models.enums.TipoMovimiento;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDate;
 
@@ -18,10 +17,10 @@ public record MovimientoInventarioCreateRequest(
         // Obligatoria segun tipoMovimiento (SALIDA / TRANSFERENCIA / TRANSFERENCIA_SERVICIO)
         String sedeOrigenCodigo,
 
-        // Obligatoria segun tipoMovimiento (ENTRADA / TRANSFERENCIA / COMPRA / RETORNO_A_SEDE)
+        // Obligatoria segun tipoMovimiento (ENTRADA / TRANSFERENCIA / COMPRA / RETORNO_A_SEDE / AJUSTE en sede)
         String sedeDestinoCodigo,
 
-        // Obligatorio segun tipoMovimiento (TRANSFERENCIA_SERVICIO / RETORNO_A_SEDE)
+        // Obligatorio segun tipoMovimiento (TRANSFERENCIA_SERVICIO / RETORNO_A_SEDE / AJUSTE en servicio)
         String codigoServicio,
 
         // Obligatorio segun tipoMovimiento (COMPRA)
@@ -40,7 +39,6 @@ public record MovimientoInventarioCreateRequest(
         LocalDate fechaEmisionFactura,
 
         @NotNull
-        @Positive
         Long cantidad,
 
         String observaciones,

@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -35,6 +36,7 @@ public class ItemService {
     private final MovimientoInventarioRepository movimientoInventarioRepository;
     private final ItemValidator itemValidator;
     private final ItemUpdateValidator itemUpdateValidator;
+    private final ItemImageStorageService itemImageStorageService;
 
     public ItemDto getItem(String codigoItem) {
         String codigoNormalizado = TextNormalizer.normalizeCode(codigoItem);
@@ -113,6 +115,32 @@ public class ItemService {
         item.setDescripcion(request.descripcion());
         item.setEnabled(request.enabled());
         item.setObservaciones(request.observaciones());
+
+        return ItemDto.from(itemRepository.save(item));
+    }
+
+    public ItemDto updateImagenItem(String codigoItem, MultipartFile file) throws IOException {
+        String codigoNormalizado = TextNormalizer.normalizeCode(codigoItem);
+        Item item = itemRepository.findByCodigoItem(codigoNormalizado)
+                .orElseThrow(() -> new RuntimeException("Item no encontrado"));
+
+        String imagenUrl = itemImageStorageService.guardarImagenItem(
+                item.getCodigoItem(),
+                file,
+                item.getImagenUrl()
+        );
+        item.setImagenUrl(imagenUrl);
+
+        return ItemDto.from(itemRepository.save(item));
+    }
+
+    public ItemDto deleteImagenItem(String codigoItem) throws IOException {
+        String codigoNormalizado = TextNormalizer.normalizeCode(codigoItem);
+        Item item = itemRepository.findByCodigoItem(codigoNormalizado)
+                .orElseThrow(() -> new RuntimeException("Item no encontrado"));
+
+        itemImageStorageService.eliminarImagen(item.getImagenUrl());
+        item.setImagenUrl(null);
 
         return ItemDto.from(itemRepository.save(item));
     }

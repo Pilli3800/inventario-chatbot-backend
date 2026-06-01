@@ -9,6 +9,7 @@ public record MovimientoHistoricoDashboardFechaDto(
         Long salida,
         Long salidaCuadrilla,
         Long devolucion,
+        Long ajuste,
         Long transferencia,
         Long transferenciaServicio,
         Long retornoASede

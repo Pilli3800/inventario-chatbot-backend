@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -100,6 +101,31 @@ public class ItemController {
                 200,
                 "/api/logistica/item/{codigoItem}",
                 itemService.updateItem(codigoItem, request)
+        );
+    }
+
+    @PutMapping(value = "/{codigoItem}/imagen", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    public SingleResponse<ItemDto> updateImagenItem(
+            @PathVariable String codigoItem,
+            @RequestPart("file") MultipartFile file
+    ) throws IOException {
+        return new SingleResponse<>(
+                200,
+                "/api/logistica/items/" + codigoItem + "/imagen",
+                itemService.updateImagenItem(codigoItem, file)
+        );
+    }
+
+    @DeleteMapping("/{codigoItem}/imagen")
+    @ResponseStatus(HttpStatus.OK)
+    public SingleResponse<ItemDto> deleteImagenItem(
+            @PathVariable String codigoItem
+    ) throws IOException {
+        return new SingleResponse<>(
+                200,
+                "/api/logistica/items/" + codigoItem + "/imagen",
+                itemService.deleteImagenItem(codigoItem)
         );
     }
 

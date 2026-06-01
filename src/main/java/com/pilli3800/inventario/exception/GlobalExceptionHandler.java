@@ -1,6 +1,7 @@
 package com.pilli3800.inventario.exception;
 
 import com.pilli3800.inventario.data.dto.response.general.SingleResponse;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -64,6 +65,24 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(err -> err.getField() + ": " + err.getDefaultMessage())
                 .toList();
+        return new SingleResponse<>(
+                400,
+                req.getRequestURI(),
+                errors
+        );
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public SingleResponse<List<String>> handleConstraintViolationException(
+            ConstraintViolationException e,
+            HttpServletRequest req
+    ) {
+        List<String> errors = e.getConstraintViolations()
+                .stream()
+                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .toList();
+
         return new SingleResponse<>(
                 400,
                 req.getRequestURI(),

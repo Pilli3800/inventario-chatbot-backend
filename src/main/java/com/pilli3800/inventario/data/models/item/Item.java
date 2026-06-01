@@ -33,6 +33,9 @@ public class Item extends RegistroAuditoria {
 
     private String descripcion;
 
+    @Column(name = "imagen_url", length = 500)
+    private String imagenUrl;
+
     @Column(nullable = false)
     private boolean enabled = true;
 

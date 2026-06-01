@@ -30,7 +30,8 @@ public class IaChatMetricaService {
             String mensaje,
             String respuesta,
             boolean exitosa,
-            String mensajeError
+            String mensajeError,
+            Long tiempoRespuestaMs
     ) {
         IaChatMetrica metrica = new IaChatMetrica();
         metrica.setSessionId(sessionId);
@@ -38,6 +39,7 @@ public class IaChatMetricaService {
         metrica.setFechaConsulta(LocalDateTime.now());
         metrica.setLongitudMensaje(longitud(mensaje));
         metrica.setLongitudRespuesta(longitud(respuesta));
+        metrica.setTiempoRespuestaMs(tiempoRespuestaMs);
         metrica.setExitosa(exitosa);
         metrica.setMensajeError(recortar(mensajeError));
 
@@ -69,6 +71,11 @@ public class IaChatMetricaService {
         Long consultasHoy = contarConsultasDesde(LocalDate.now().atStartOfDay(), usuarioFiltro);
         Long consultasUltimos7Dias = contarConsultasDesde(LocalDate.now().minusDays(6).atStartOfDay(), usuarioFiltro);
         Long consultasUltimos30Dias = contarConsultasDesde(LocalDate.now().minusDays(29).atStartOfDay(), usuarioFiltro);
+        Double promedioTiempoRespuestaMs = iaChatMetricaRepository.obtenerPromedioTiempoRespuestaMs(
+                fechaDesdeFiltro,
+                fechaHastaFiltro,
+                usuarioFiltro
+        );
 
         List<IaChatDashboardFechaDto> porFecha = iaChatMetricaRepository.obtenerPorFechaDashboard(
                 fechaDesdeFiltro,
@@ -90,6 +97,7 @@ public class IaChatMetricaService {
                 totalUsuariosActivos,
                 porcentaje(resumen.usuariosQueUsaronIA(), totalUsuariosActivos),
                 promedio(resumen.totalConsultas(), resumen.totalSesiones()),
+                milisegundosASegundos(promedioTiempoRespuestaMs),
                 consultasHoy,
                 consultasUltimos7Dias,
                 consultasUltimos30Dias,
@@ -133,5 +141,12 @@ public class IaChatMetricaService {
             return 0.0;
         }
         return Math.round((valor(totalConsultas) * 100.0) / totalSesiones) / 100.0;
+    }
+
+    private Double milisegundosASegundos(Double milisegundos) {
+        if (milisegundos == null) {
+            return 0.0;
+        }
+        return Math.round((milisegundos / 1000.0) * 100.0) / 100.0;
     }
 }

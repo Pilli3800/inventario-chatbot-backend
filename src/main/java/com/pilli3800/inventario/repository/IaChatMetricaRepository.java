@@ -48,6 +48,21 @@ public interface IaChatMetricaRepository extends JpaRepository<IaChatMetrica, Lo
     );
 
     @Query("""
+    SELECT AVG(m.tiempoRespuestaMs)
+    FROM IaChatMetrica m
+    WHERE m.fechaConsulta >= :fechaDesde
+      AND m.fechaConsulta <= :fechaHasta
+      AND m.exitosa = true
+      AND m.tiempoRespuestaMs IS NOT NULL
+      AND (:usuario IS NULL OR m.usuario = :usuario)
+""")
+    Double obtenerPromedioTiempoRespuestaMs(
+            @Param("fechaDesde") LocalDateTime fechaDesde,
+            @Param("fechaHasta") LocalDateTime fechaHasta,
+            @Param("usuario") String usuario
+    );
+
+    @Query("""
     SELECT new com.pilli3800.inventario.data.dto.response.ia.IaChatDashboardFechaDto(
         CAST(m.fechaConsulta AS localdate),
         COUNT(m.id),

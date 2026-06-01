@@ -2,6 +2,7 @@ package com.pilli3800.inventario.controller;
 
 import com.pilli3800.inventario.data.dto.request.conteofisico.ConteoFisicoCreateRequest;
 import com.pilli3800.inventario.data.dto.request.conteofisico.ConteoFisicoSearchRequest;
+import com.pilli3800.inventario.data.dto.response.ConteoFisicoDashboardDto;
 import com.pilli3800.inventario.data.dto.response.ConteoFisicoDto;
 import com.pilli3800.inventario.data.dto.response.general.PageResponse;
 import com.pilli3800.inventario.data.dto.response.general.SingleResponse;
@@ -67,6 +68,28 @@ public class ConteoFisicoController {
                 conteoFisicoService.getConteos(request, ajustarOrden(pageable));
 
         return PageResponse.from(page);
+    }
+
+    @GetMapping("/dashboard")
+    @ResponseStatus(HttpStatus.OK)
+    public SingleResponse<ConteoFisicoDashboardDto> getDashboard(
+            @RequestParam(required = false) LocalDate fechaDesde,
+            @RequestParam(required = false) LocalDate fechaHasta,
+            @RequestParam(required = false) String usuario,
+            @RequestParam(required = false) TipoInventarioConteo tipoInventario,
+            @RequestParam(required = false) String codigoUbicacion
+    ) {
+        return new SingleResponse<>(
+                200,
+                "/api/conteos-fisicos/dashboard",
+                conteoFisicoService.getDashboard(
+                        fechaDesde,
+                        fechaHasta,
+                        usuario,
+                        tipoInventario,
+                        codigoUbicacion
+                )
+        );
     }
 
     @GetMapping("/{id}")

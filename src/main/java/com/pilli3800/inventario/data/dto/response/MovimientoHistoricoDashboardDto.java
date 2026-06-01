@@ -9,9 +9,12 @@ public record MovimientoHistoricoDashboardDto(
         Long salida,
         Long salidaCuadrilla,
         Long devolucion,
+        Long ajuste,
         Long transferencia,
         Long transferenciaServicio,
         Long retornoASede,
+        Long movimientosTrazables,
+        Double nivelTrazabilidad,
         List<MovimientoHistoricoDashboardFechaDto> porFecha
 ) {
 }

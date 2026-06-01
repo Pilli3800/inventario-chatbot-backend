@@ -102,6 +102,9 @@ public class MovimientoTools {
             case "DEVOLUCION" ->
                     "El item fue devuelto por la cuadrilla " + valorOmitible(movimiento.codigoCuadrilla())
                             + " al servicio " + valorServicio(movimiento.servicio()) + ".";
+            case "AJUSTE" ->
+                    "El item tuvo un ajuste administrativo en "
+                            + describirDestinoAjuste(movimiento.sedeDestino(), movimiento.servicio()) + ".";
             default ->
                     "El movimiento fue registrado sin una descripcion de ubicacion disponible.";
         };
@@ -129,9 +132,22 @@ public class MovimientoTools {
             case "DEVOLUCION" ->
                     "El item fue devuelto por la cuadrilla " + valorOmitible(movimiento.codigoCuadrilla())
                             + " al servicio " + valorServicio(movimiento.servicio()) + ".";
+            case "AJUSTE" ->
+                    "El item tuvo un ajuste administrativo en "
+                            + describirDestinoAjuste(movimiento.sedeDestino(), movimiento.servicio()) + ".";
             default ->
                     "El movimiento fue registrado sin una descripcion de ubicacion disponible.";
         };
+    }
+
+    private String describirDestinoAjuste(String sedeDestino, CodigoNombreDto servicio) {
+        if (sedeDestino != null && !sedeDestino.isBlank()) {
+            return "la sede " + sedeDestino;
+        }
+        if (servicio != null) {
+            return "el servicio " + valorServicio(servicio);
+        }
+        return "una ubicacion no especificada";
     }
 
     private String valorServicio(CodigoNombreDto servicio) {

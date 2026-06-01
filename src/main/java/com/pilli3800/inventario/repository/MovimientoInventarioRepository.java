@@ -4,12 +4,10 @@ import com.pilli3800.inventario.data.dto.response.ItemMovimientosCantidadDto;
 import com.pilli3800.inventario.data.dto.response.MovimientoHistoricoDashboardFechaTipoDto;
 import com.pilli3800.inventario.data.dto.response.MovimientoHistoricoDashboardTipoDto;
 import com.pilli3800.inventario.data.dto.response.StockMovidoPorItemDto;
-import com.pilli3800.inventario.data.models.Cuadrilla;
 import com.pilli3800.inventario.data.models.InventarioSede;
 import com.pilli3800.inventario.data.models.InventarioServicio;
 import com.pilli3800.inventario.data.models.MovimientoInventario;
 import com.pilli3800.inventario.data.models.item.Item;
-import com.pilli3800.inventario.data.models.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -106,29 +104,6 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
     LEFT JOIN m.inventarioDestino id
     LEFT JOIN m.inventarioServicioOrigen iso
     LEFT JOIN m.inventarioServicioDestino isd
-    WHERE m.usuario = :usuario
-      AND m.cuadrilla = :cuadrilla
-      AND (
-            io.item = :item
-         OR id.item = :item
-         OR iso.item = :item
-         OR isd.item = :item
-      )
-    ORDER BY m.fechaMovimiento DESC
-""")
-    List<MovimientoInventario> findMovimientosPorUsuarioCuadrillaItemOrdenados(
-            @Param("usuario") User usuario,
-            @Param("cuadrilla") Cuadrilla cuadrilla,
-            @Param("item") Item item
-    );
-
-    @Query("""
-    SELECT m
-    FROM MovimientoInventario m
-    LEFT JOIN m.inventarioOrigen io
-    LEFT JOIN m.inventarioDestino id
-    LEFT JOIN m.inventarioServicioOrigen iso
-    LEFT JOIN m.inventarioServicioDestino isd
     JOIN Item i ON (i = io.item OR i = id.item OR i = iso.item OR i = isd.item)
     WHERE i = :item
     ORDER BY m.fechaMovimiento DESC
@@ -185,7 +160,7 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
     WHERE m.fechaMovimiento >= :fechaDesde
       AND m.fechaMovimiento <= :fechaHasta
       AND m.usuario.identUsuario LIKE :usuario
-      AND c.codigoCuadrilla LIKE :codigoCuadrilla
+      AND (:codigoCuadrilla = '%' OR c.codigoCuadrilla LIKE :codigoCuadrilla)
       AND (
             :codigoServicio = '%'
          OR cs.codigo LIKE :codigoServicio
@@ -195,6 +170,48 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
     GROUP BY m.tipoMovimiento
 """)
     List<MovimientoHistoricoDashboardTipoDto> contarPorTipoMovimientoDashboard(
+            @Param("fechaDesde") LocalDateTime fechaDesde,
+            @Param("fechaHasta") LocalDateTime fechaHasta,
+            @Param("usuario") String usuario,
+            @Param("codigoCuadrilla") String codigoCuadrilla,
+            @Param("codigoServicio") String codigoServicio
+    );
+
+    @Query("""
+    SELECT COUNT(DISTINCT m.id)
+    FROM MovimientoInventario m
+    LEFT JOIN m.cuadrilla c
+    LEFT JOIN c.servicio cs
+    LEFT JOIN m.inventarioOrigen io
+    LEFT JOIN m.inventarioDestino id
+    LEFT JOIN m.inventarioServicioOrigen iso
+    LEFT JOIN iso.servicio isos
+    LEFT JOIN m.inventarioServicioDestino isd
+    LEFT JOIN isd.servicio isds
+    JOIN Item i ON (i = io.item OR i = id.item OR i = iso.item OR i = isd.item)
+    WHERE m.fechaMovimiento >= :fechaDesde
+      AND m.fechaMovimiento <= :fechaHasta
+      AND m.usuario.identUsuario LIKE :usuario
+      AND (:codigoCuadrilla = '%' OR c.codigoCuadrilla LIKE :codigoCuadrilla)
+      AND (
+            :codigoServicio = '%'
+         OR cs.codigo LIKE :codigoServicio
+         OR isos.codigo LIKE :codigoServicio
+         OR isds.codigo LIKE :codigoServicio
+      )
+      AND m.tipoMovimiento IS NOT NULL
+      AND m.cantidad IS NOT NULL
+      AND m.cantidad <> 0
+      AND m.fechaMovimiento IS NOT NULL
+      AND m.usuario IS NOT NULL
+      AND (
+            io.id IS NOT NULL
+         OR id.id IS NOT NULL
+         OR iso.id IS NOT NULL
+         OR isd.id IS NOT NULL
+      )
+""")
+    Long contarMovimientosTrazablesDashboard(
             @Param("fechaDesde") LocalDateTime fechaDesde,
             @Param("fechaHasta") LocalDateTime fechaHasta,
             @Param("usuario") String usuario,
@@ -218,7 +235,7 @@ public interface MovimientoInventarioRepository extends JpaRepository<Movimiento
     WHERE m.fechaMovimiento >= :fechaDesde
       AND m.fechaMovimiento <= :fechaHasta
       AND m.usuario.identUsuario LIKE :usuario
-      AND c.codigoCuadrilla LIKE :codigoCuadrilla
+      AND (:codigoCuadrilla = '%' OR c.codigoCuadrilla LIKE :codigoCuadrilla)
       AND (
             :codigoServicio = '%'
          OR cs.codigo LIKE :codigoServicio

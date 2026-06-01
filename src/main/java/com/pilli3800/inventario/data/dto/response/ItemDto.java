@@ -11,6 +11,7 @@ public record ItemDto(
         String nombre,
         String descripcion,
         String codigoItem,
+        String imagenUrl,
         boolean enabled,
         String observaciones
 ) {
@@ -22,6 +23,7 @@ public record ItemDto(
                 item.getNombre(),
                 item.getDescripcion(),
                 item.getCodigoItem(),
+                item.getImagenUrl(),
                 item.isEnabled(),
                 item.getObservaciones()
         );

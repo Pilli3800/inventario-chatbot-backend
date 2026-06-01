@@ -9,6 +9,7 @@ public enum TipoMovimiento {
     SALIDA_CUADRILLA,
     // Movimientos internos
     DEVOLUCION,
+    AJUSTE,
     TRANSFERENCIA,
     TRANSFERENCIA_SERVICIO,
     RETORNO_A_SEDE

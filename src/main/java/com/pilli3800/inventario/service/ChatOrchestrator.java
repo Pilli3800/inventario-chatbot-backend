@@ -64,6 +64,7 @@ public class ChatOrchestrator {
             Collection<? extends GrantedAuthority> roles,
             ChatScreenContextRequest contextoPantalla
     ) {
+        long inicioMs = System.currentTimeMillis();
         String sessionIdMetrica = sessionId;
 
         try {
@@ -97,11 +98,11 @@ public class ChatOrchestrator {
                     .content();
 
             chatMemoryService.saveInteraction(session, message, response);
-            registrarMetrica(sessionIdMetrica, usuario, message, response, true, null);
+            registrarMetrica(sessionIdMetrica, usuario, message, response, true, null, calcularTiempoRespuestaMs(inicioMs));
 
             return new ChatResponse(session.getSessionId(), response);
         } catch (RuntimeException e) {
-            registrarMetrica(sessionIdMetrica, usuario, message, null, false, e.getMessage());
+            registrarMetrica(sessionIdMetrica, usuario, message, null, false, e.getMessage(), calcularTiempoRespuestaMs(inicioMs));
             throw e;
         }
     }
@@ -112,7 +113,8 @@ public class ChatOrchestrator {
             String mensaje,
             String respuesta,
             boolean exitosa,
-            String mensajeError
+            String mensajeError,
+            Long tiempoRespuestaMs
     ) {
         try {
             iaChatMetricaService.registrarConsulta(
@@ -121,10 +123,15 @@ public class ChatOrchestrator {
                     mensaje,
                     respuesta,
                     exitosa,
-                    mensajeError
+                    mensajeError,
+                    tiempoRespuestaMs
             );
         } catch (RuntimeException ignored) {
         }
+    }
+
+    private Long calcularTiempoRespuestaMs(long inicioMs) {
+        return System.currentTimeMillis() - inicioMs;
     }
 
     private String construirPromptSistema(

@@ -119,6 +119,13 @@ public class MovimientoHistoricoService {
         Long total = porTipoMovimiento.values()
                 .stream()
                 .reduce(0L, Long::sum);
+        Long movimientosTrazables = movimientoInventarioRepository.contarMovimientosTrazablesDashboard(
+                filtros.desde(),
+                filtros.hasta(),
+                usuarioFiltro,
+                cuadrillaFiltro,
+                servicioFiltro
+        );
 
         return new MovimientoHistoricoDashboardDto(
                 total,
@@ -127,9 +134,12 @@ public class MovimientoHistoricoService {
                 porTipoMovimiento.get(TipoMovimiento.SALIDA),
                 porTipoMovimiento.get(TipoMovimiento.SALIDA_CUADRILLA),
                 porTipoMovimiento.get(TipoMovimiento.DEVOLUCION),
+                porTipoMovimiento.get(TipoMovimiento.AJUSTE),
                 porTipoMovimiento.get(TipoMovimiento.TRANSFERENCIA),
                 porTipoMovimiento.get(TipoMovimiento.TRANSFERENCIA_SERVICIO),
                 porTipoMovimiento.get(TipoMovimiento.RETORNO_A_SEDE),
+                valor(movimientosTrazables),
+                porcentaje(movimientosTrazables, total),
                 porFechas
                         ? obtenerDashboardPorFecha(filtros, usuarioFiltro, cuadrillaFiltro, servicioFiltro)
                         : null
@@ -293,6 +303,7 @@ public class MovimientoHistoricoService {
                     contador.get(TipoMovimiento.SALIDA),
                     contador.get(TipoMovimiento.SALIDA_CUADRILLA),
                     contador.get(TipoMovimiento.DEVOLUCION),
+                    contador.get(TipoMovimiento.AJUSTE),
                     contador.get(TipoMovimiento.TRANSFERENCIA),
                     contador.get(TipoMovimiento.TRANSFERENCIA_SERVICIO),
                     contador.get(TipoMovimiento.RETORNO_A_SEDE)
@@ -300,6 +311,17 @@ public class MovimientoHistoricoService {
         }
 
         return resultado;
+    }
+
+    private Long valor(Long valor) {
+        return valor != null ? valor : 0L;
+    }
+
+    private Double porcentaje(Long parte, Long total) {
+        if (total == null || total == 0) {
+            return 0.0;
+        }
+        return Math.round((valor(parte) * 10000.0) / total) / 100.0;
     }
 
     private record FiltrosFecha(

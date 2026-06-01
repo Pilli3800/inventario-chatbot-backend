@@ -14,6 +14,8 @@ import com.lowagie.text.pdf.PdfWriter;
 import com.pilli3800.inventario.data.dto.request.conteofisico.ConteoFisicoCreateRequest;
 import com.pilli3800.inventario.data.dto.request.conteofisico.ConteoFisicoDetalleRequest;
 import com.pilli3800.inventario.data.dto.request.conteofisico.ConteoFisicoSearchRequest;
+import com.pilli3800.inventario.data.dto.response.ConteoFisicoDashboardDto;
+import com.pilli3800.inventario.data.dto.response.ConteoFisicoDashboardResumenDto;
 import com.pilli3800.inventario.data.dto.response.ConteoFisicoDto;
 import com.pilli3800.inventario.data.models.InventarioSede;
 import com.pilli3800.inventario.data.models.InventarioServicio;
@@ -43,6 +45,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -54,6 +57,9 @@ import static com.pilli3800.inventario.util.TextFormat.reemplazarNuloPorVacio;
 @Service
 @RequiredArgsConstructor
 public class ConteoFisicoService {
+
+    private static final LocalDateTime FECHA_MINIMA = LocalDateTime.of(1900, 1, 1, 0, 0);
+    private static final LocalDateTime FECHA_MAXIMA = LocalDateTime.of(3000, 1, 1, 0, 0);
 
     private final ConteoFisicoRepository conteoFisicoRepository;
     private final ConteoFisicoCreateValidator createValidator;
@@ -128,6 +134,53 @@ public class ConteoFisicoService {
     @Transactional
     public ConteoFisicoDto getConteo(Long id) {
         return ConteoFisicoDto.from(obtenerConteoPorId(id));
+    }
+
+    @Transactional
+    public ConteoFisicoDashboardDto getDashboard(
+            LocalDate fechaDesde,
+            LocalDate fechaHasta,
+            String usuario,
+            TipoInventarioConteo tipoInventario,
+            String codigoUbicacion
+    ) {
+        ConteoFisicoSearchRequest request = normalizarFiltroUbicacion(ajustarFiltroUsuario(
+                new ConteoFisicoSearchRequest(
+                        fechaDesde,
+                        fechaHasta,
+                        usuario,
+                        tipoInventario,
+                        codigoUbicacion,
+                        null
+                )
+        ));
+        ConteoFisicoDashboardResumenDto resumen = conteoFisicoRepository.obtenerResumenDashboard(
+                request.fechaDesde() != null ? request.fechaDesde().atStartOfDay() : FECHA_MINIMA,
+                request.fechaHasta() != null ? request.fechaHasta().atTime(23, 59, 59) : FECHA_MAXIMA,
+                request.usuarioId(),
+                valorFiltro(request.usuario()),
+                request.tipoInventario(),
+                valorFiltro(request.codigoUbicacion())
+        );
+
+        Long totalConteos = valor(resumen.totalConteos());
+        Long totalItemsContados = valor(resumen.totalItemsContados());
+        Long itemsEvaluados = valor(resumen.itemsEvaluados());
+        Long itemsConDiscrepancia = valor(resumen.itemsConDiscrepancia());
+        Long stockSistemaTotal = valor(resumen.stockSistemaTotal());
+        Long stockFisicoTotal = valor(resumen.stockFisicoTotal());
+        Long diferenciaAbsolutaTotal = valor(resumen.diferenciaAbsolutaTotal());
+
+        return new ConteoFisicoDashboardDto(
+                totalConteos,
+                totalItemsContados,
+                itemsEvaluados,
+                itemsConDiscrepancia,
+                stockSistemaTotal,
+                stockFisicoTotal,
+                diferenciaAbsolutaTotal,
+                porcentaje(diferenciaAbsolutaTotal, stockSistemaTotal)
+        );
     }
 
     @Transactional
@@ -476,5 +529,20 @@ public class ConteoFisicoService {
         String nombres = usuario.getNombres() != null ? usuario.getNombres() : "";
         String apellidos = usuario.getApellidos() != null ? usuario.getApellidos() : "";
         return (nombres + " " + apellidos).trim();
+    }
+
+    private String valorFiltro(String valor) {
+        return valor != null && !valor.isBlank() ? valor : null;
+    }
+
+    private Long valor(Long valor) {
+        return valor != null ? valor : 0L;
+    }
+
+    private Double porcentaje(Long parte, Long total) {
+        if (total == null || total == 0) {
+            return 0.0;
+        }
+        return Math.round((valor(parte) * 10000.0) / total) / 100.0;
     }
 }

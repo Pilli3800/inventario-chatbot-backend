@@ -41,6 +41,9 @@ public class IaChatMetrica extends RegistroAuditoria {
     @Column(name = "longitud_respuesta", nullable = false)
     private Integer longitudRespuesta;
 
+    @Column(name = "tiempo_respuesta_ms")
+    private Long tiempoRespuestaMs;
+
     @Column(name = "exitosa", nullable = false)
     private boolean exitosa;
 

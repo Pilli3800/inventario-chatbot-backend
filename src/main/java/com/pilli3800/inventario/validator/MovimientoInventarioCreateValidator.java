@@ -29,8 +29,13 @@ public class MovimientoInventarioCreateValidator {
             errors.add("El tipo de movimiento es obligatorio");
         }
 
-        // Cantidad
-        if (request.cantidad() == null || request.cantidad() <= 0) {
+        if (request.cantidad() == null) {
+            errors.add("La cantidad es obligatoria");
+        } else if (request.tipoMovimiento() == TipoMovimiento.AJUSTE) {
+            if (request.cantidad() == 0) {
+                errors.add("La cantidad del ajuste debe ser distinta de cero");
+            }
+        } else if (request.cantidad() <= 0) {
             errors.add("La cantidad debe ser mayor a cero");
         }
 
@@ -59,11 +64,10 @@ public class MovimientoInventarioCreateValidator {
         }
 
         if (request.tipoMovimiento() == TipoMovimiento.SALIDA
-                || request.tipoMovimiento() == TipoMovimiento.SALIDA_CUADRILLA
-                || request.tipoMovimiento() == TipoMovimiento.DEVOLUCION) {
+                || request.tipoMovimiento() == TipoMovimiento.SALIDA_CUADRILLA) {
 
             if (request.codigoCuadrilla() == null || request.codigoCuadrilla().isBlank()) {
-                errors.add("La salida o devolucion debe estar asociada a una cuadrilla");
+                errors.add("La salida debe estar asociada a una cuadrilla");
             }
         }
 
@@ -115,12 +119,21 @@ public class MovimientoInventarioCreateValidator {
             }
         }
 
-        if (request.tipoMovimiento() == TipoMovimiento.DEVOLUCION) {
-            if (request.codigoCuadrilla() == null || request.codigoCuadrilla().isBlank()) {
-                errors.add("La devolucion debe indicar cuadrilla");
+        if (request.tipoMovimiento() == TipoMovimiento.AJUSTE) {
+            boolean tieneSede = request.sedeDestinoCodigo() != null && !request.sedeDestinoCodigo().isBlank();
+            boolean tieneServicio = request.codigoServicio() != null && !request.codigoServicio().isBlank();
+
+            if (tieneSede == tieneServicio) {
+                errors.add("El ajuste debe indicar una sede o un servicio, pero no ambos");
             }
-            if (request.sedeDestinoCodigo() != null && !request.sedeDestinoCodigo().isBlank()) {
-                errors.add("La devolucion no debe indicar sede destino");
+            if (request.sedeOrigenCodigo() != null && !request.sedeOrigenCodigo().isBlank()) {
+                errors.add("El ajuste no debe indicar sede origen");
+            }
+            if (request.codigoCuadrilla() != null && !request.codigoCuadrilla().isBlank()) {
+                errors.add("El ajuste no debe indicar cuadrilla");
+            }
+            if (request.observaciones() == null || request.observaciones().isBlank()) {
+                errors.add("El ajuste debe indicar observaciones");
             }
         }
 

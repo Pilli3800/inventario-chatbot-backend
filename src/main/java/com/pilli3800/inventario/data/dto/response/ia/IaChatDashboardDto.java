@@ -11,6 +11,7 @@ public record IaChatDashboardDto(
         Long totalUsuariosActivos,
         Double porcentajeUsuariosQueUsaronIA,
         Double promedioConsultasPorSesion,
+        Double promedioTiempoRespuestaSegundos,
         Long consultasHoy,
         Long consultasUltimos7Dias,
         Long consultasUltimos30Dias,

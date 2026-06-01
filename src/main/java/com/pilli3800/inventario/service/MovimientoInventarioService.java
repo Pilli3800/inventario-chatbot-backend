@@ -45,13 +45,13 @@ public class MovimientoInventarioService {
 
     @Transactional
     public void registrarMovimiento(MovimientoInventarioCreateRequest request) {
-        createValidator.validate(request);
-
         if (request.tipoMovimiento() == TipoMovimiento.DEVOLUCION) {
             throw new ValidationException(
                     List.of("La devolucion debe registrarse desde una solicitud entregada")
             );
         }
+
+        createValidator.validate(request);
 
         if (request.tipoMovimiento() == TipoMovimiento.COMPRA) {
             compraCreateValidator.validate(
@@ -94,7 +94,10 @@ public class MovimientoInventarioService {
             case TRANSFERENCIA -> procesarTransferencia(request, item, usuario);
             case TRANSFERENCIA_SERVICIO -> procesarTransferenciaServicio(request, item, usuario);
             case RETORNO_A_SEDE -> procesarRetornoASede(request, item, usuario);
-            case DEVOLUCION -> procesarDevolucion(request, item, usuario, cuadrilla);
+            case AJUSTE -> procesarAjuste(request, item, usuario);
+            case DEVOLUCION -> throw new ValidationException(
+                    List.of("La devolucion debe registrarse desde una solicitud entregada")
+            );
             default -> throw new ValidationException(
                     List.of("Tipo de movimiento no soportado")
             );
@@ -314,28 +317,61 @@ public class MovimientoInventarioService {
         );
     }
 
-    private void procesarDevolucion(MovimientoInventarioCreateRequest request, Item item, User usuario, Cuadrilla cuadrilla) {
-        validarDevolucion(item, cuadrilla, usuario, request.cantidad());
+    private void procesarAjuste(MovimientoInventarioCreateRequest request, Item item, User usuario) {
+        InventarioSede inventarioSede = null;
+        InventarioServicio inventarioServicio = null;
 
-        // Devolucion a inventario del servicio de la cuadrilla
-        Servicio servicioDestino = cuadrilla.getServicio();
-        InventarioServicio destinoServicio = inventarioServicioService.obtenerOcrear(item, servicioDestino);
-        destinoServicio.sumarStock(request.cantidad());
+        if (request.sedeDestinoCodigo() != null && !request.sedeDestinoCodigo().isBlank()) {
+            Sede sede = sedeRepository.findByCodigo(request.sedeDestinoCodigo())
+                    .orElseThrow(() -> new ValidationException(List.of("La sede del ajuste no existe")));
+            inventarioSede = request.cantidad() > 0
+                    ? inventarioSedeService.obtenerOcrear(item, sede)
+                    : inventarioSedeService.obtenerExistente(item, sede);
+        } else {
+            Servicio servicio = servicioRepository.findByCodigo(
+                            TextNormalizer.normalizeCode(request.codigoServicio())
+                    )
+                    .orElseThrow(() -> new ValidationException(List.of("El servicio del ajuste no existe")));
+            inventarioServicio = request.cantidad() > 0
+                    ? inventarioServicioService.obtenerOcrear(item, servicio)
+                    : inventarioServicioService.obtenerExistente(item, servicio);
+        }
+
+        Long cantidadAbsoluta = Math.abs(request.cantidad());
+        Long nuevoStock;
+        if (inventarioSede != null) {
+            if (request.cantidad() > 0) {
+                inventarioSede.sumarStock(cantidadAbsoluta);
+            } else {
+                inventarioSede.restarStock(cantidadAbsoluta);
+            }
+            nuevoStock = inventarioSede.getStock();
+        } else if (request.cantidad() > 0) {
+            inventarioServicio.sumarStock(cantidadAbsoluta);
+            nuevoStock = inventarioServicio.getStockActual();
+        } else {
+            inventarioServicio.restarStock(cantidadAbsoluta);
+            nuevoStock = inventarioServicio.getStockActual();
+        }
 
         guardarMovimiento(
-                TipoMovimiento.DEVOLUCION,
+                TipoMovimiento.AJUSTE,
                 request.cantidad(),
                 usuario,
                 null,
+                inventarioSede,
+                null,
+                inventarioServicio,
                 null,
                 null,
-                destinoServicio,
                 null,
-                null,
-                null,
-                request.observaciones(),
-                cuadrilla
+                observacionAjuste(nuevoStock, request.observaciones()),
+                null
         );
+    }
+
+    private String observacionAjuste(Long nuevoStock, String observaciones) {
+        return "El nuevo stock es: " + nuevoStock + ". " + observaciones;
     }
 
     private void guardarMovimiento(
@@ -378,8 +414,9 @@ public class MovimientoInventarioService {
                 .anyMatch(r -> r.getNombreRol().equals("JEFE_CUADRILLA"));
 
         boolean permitido = switch (tipoMovimiento) {
-            case ENTRADA, COMPRA, TRANSFERENCIA, TRANSFERENCIA_SERVICIO, RETORNO_A_SEDE -> esLogistica;
-            case SALIDA, SALIDA_CUADRILLA, DEVOLUCION -> esJefeCuadrilla;
+            case ENTRADA, COMPRA, TRANSFERENCIA, TRANSFERENCIA_SERVICIO, RETORNO_A_SEDE, AJUSTE -> esLogistica;
+            case SALIDA, SALIDA_CUADRILLA -> esJefeCuadrilla;
+            case DEVOLUCION -> false;
         };
 
         if (!permitido) {
@@ -394,8 +431,7 @@ public class MovimientoInventarioService {
     ) {
 
         if (request.tipoMovimiento() != TipoMovimiento.SALIDA
-                && request.tipoMovimiento() != TipoMovimiento.SALIDA_CUADRILLA
-                && request.tipoMovimiento() != TipoMovimiento.DEVOLUCION) {
+                && request.tipoMovimiento() != TipoMovimiento.SALIDA_CUADRILLA) {
             return null;
         }
 
@@ -422,67 +458,6 @@ public class MovimientoInventarioService {
 
         return cuadrilla;
     }
-
-    private void validarDevolucion(
-            Item item,
-            Cuadrilla cuadrilla,
-            User usuario,
-            Long cantidadDevolucion
-    ) {
-
-        List<MovimientoInventario> movimientos =
-                movimientoInventarioRepository
-                        .findMovimientosPorUsuarioCuadrillaItemOrdenados(
-                                usuario,
-                                cuadrilla,
-                                item
-                        );
-        if (movimientos.isEmpty()) {
-            throw new ValidationException(
-                    List.of("No existe ningun movimiento previo para este item y cuadrilla")
-            );
-        }
-
-        MovimientoInventario ultimoMovimiento = movimientos.getFirst();
-
-        // Solo se valida contra el ultimo movimiento del item en esa cuadrilla
-        // El ultimo movimiento debe ser una salida de cuadrilla
-        if (ultimoMovimiento.getTipoMovimiento() != TipoMovimiento.SALIDA_CUADRILLA) {
-            throw new ValidationException(
-                    List.of(
-                            "No se puede registrar una devolucion porque el ultimo movimiento no es una salida de cuadrilla"
-                    )
-            );
-        }
-
-        InventarioServicio inventarioSalida = ultimoMovimiento.getInventarioServicioOrigen();
-        if (inventarioSalida == null
-                || !inventarioSalida.getServicio().getId().equals(cuadrilla.getServicio().getId())) {
-            throw new ValidationException(
-                    List.of("La devolucion debe corresponder al mismo servicio de la salida")
-            );
-        }
-
-        // Cantidad > 0
-        if (cantidadDevolucion <= 0) {
-            throw new ValidationException(
-                    List.of("La cantidad a devolver debe ser mayor a cero")
-            );
-        }
-
-        // Cantidad <= ultima salida
-        if (cantidadDevolucion > ultimoMovimiento.getCantidad()) {
-            throw new ValidationException(
-                    List.of(
-                            "La cantidad a devolver no puede ser mayor a la cantidad de la ultima salida"
-                    )
-            );
-        }
-    }
-
-
 }
-
-
 
 

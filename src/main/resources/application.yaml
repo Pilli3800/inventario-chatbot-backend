@@ -2,6 +2,11 @@ spring:
   application:
     name: inventario
 
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+
   datasource:
     url: jdbc:postgresql://localhost:5432/inventario_chatbot
     username: postgres
@@ -35,3 +40,8 @@ spring.ai:
 inventario:
   chat:
     session-retention-days: 15
+
+app:
+  uploads:
+    items-path: uploads/items
+    items-public-base-url: /uploads/items
