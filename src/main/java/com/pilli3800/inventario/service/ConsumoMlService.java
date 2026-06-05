@@ -1,6 +1,6 @@
 package com.pilli3800.inventario.service;
 
-import com.pilli3800.inventario.client.ConsumoMlClient;
+import com.pilli3800.inventario.client.ClienteConsumoMl;
 import com.pilli3800.inventario.data.dto.response.ml.AlertaMlDto;
 import com.pilli3800.inventario.data.dto.response.ml.ConsumoAnomaliaResponse;
 import com.pilli3800.inventario.data.dto.response.ml.ConsumoEvolucionResponse;
@@ -15,14 +15,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ConsumoMlService {
 
-    private final ConsumoMlClient consumoMlClient;
+    private final ClienteConsumoMl clienteConsumoMl;
 
     public ConsumoAnomaliaResponse obtenerAnomalias(
             Integer dias,
             Integer periodosHistorial,
             boolean guardarAlertas
     ) {
-        return consumoMlClient.obtenerAnomalias(dias, periodosHistorial, guardarAlertas);
+        return clienteConsumoMl.obtenerAnomalias(dias, periodosHistorial, guardarAlertas);
     }
 
     public ConsumoEvolucionResponse obtenerEvolucion(
@@ -31,7 +31,7 @@ public class ConsumoMlService {
             Integer dias,
             boolean guardarAlertas
     ) {
-        return consumoMlClient.obtenerEvolucion(cuadrillaCodigo, itemCodigo, dias, guardarAlertas);
+        return clienteConsumoMl.obtenerEvolucion(cuadrillaCodigo, itemCodigo, dias, guardarAlertas);
     }
 
     public ConsumoProyeccionResponse obtenerProyeccion(
@@ -39,7 +39,7 @@ public class ConsumoMlService {
             Integer diasHist,
             Integer diasFuturo
     ) {
-        return consumoMlClient.obtenerProyeccion(itemCodigo, diasHist, diasFuturo);
+        return clienteConsumoMl.obtenerProyeccion(itemCodigo, diasHist, diasFuturo);
     }
 
     public List<AlertaMlDto> obtenerAlertas(
@@ -50,7 +50,7 @@ public class ConsumoMlService {
             LocalDate fechaFin,
             Integer limit
     ) {
-        return consumoMlClient.obtenerAlertas(
+        return clienteConsumoMl.obtenerAlertas(
                 tipo,
                 referenciaTipo,
                 referenciaCodigo,

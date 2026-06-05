@@ -4,7 +4,7 @@ import com.pilli3800.inventario.data.dto.response.ItemHistorialMovimientoDto;
 import com.pilli3800.inventario.data.dto.response.MovimientoInventarioDto;
 import com.pilli3800.inventario.data.dto.response.general.CodigoNombreDto;
 import com.pilli3800.inventario.service.ItemService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
@@ -13,10 +13,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@RequiredArgsConstructor
 public class MovimientoTools {
 
     private final ItemService itemService;
+    private final String baseUrlFrontend;
+
+    public MovimientoTools(
+            ItemService itemService,
+            @Value("${app.frontend.base-url}") String baseUrlFrontend
+    ) {
+        this.itemService = itemService;
+        this.baseUrlFrontend = normalizarBasePublica(baseUrlFrontend);
+    }
 
     @Tool(description = """
             Obtiene solo el ultimo movimiento de un item por su codigo exacto.
@@ -25,7 +33,7 @@ public class MovimientoTools {
     @PreAuthorize("isAuthenticated()")
     public String obtenerUltimoMovimientoPorCodigoItem(String codigoItem) {
         MovimientoInventarioDto ultimoMovimiento = itemService.getUltimoMovimientoItem(codigoItem);
-        String enlaceDetalle = "http://localhost:5173/logistica/movimientos/ver/" + ultimoMovimiento.id();
+        String enlaceDetalle = construirUrlMovimiento(ultimoMovimiento.id());
 
         return """
                 El ultimo movimiento del item %s (%s) fue una %s.
@@ -163,7 +171,7 @@ public class MovimientoTools {
     }
 
     private String formatearMovimientoHistorial(ItemHistorialMovimientoDto movimiento, int indice) {
-        String enlaceDetalle = "http://localhost:5173/logistica/movimientos/ver/" + movimiento.id();
+        String enlaceDetalle = construirUrlMovimiento(movimiento.id());
 
         return """
                 %d. **%s** - %d unid
@@ -181,5 +189,16 @@ public class MovimientoTools {
                 movimiento.id(),
                 enlaceDetalle
         ).trim();
+    }
+
+    private String construirUrlMovimiento(Long movimientoId) {
+        return baseUrlFrontend + "/logistica/movimientos/ver/" + movimientoId;
+    }
+
+    private String normalizarBasePublica(String basePublica) {
+        if (basePublica.endsWith("/")) {
+            return basePublica.substring(0, basePublica.length() - 1);
+        }
+        return basePublica;
     }
 }

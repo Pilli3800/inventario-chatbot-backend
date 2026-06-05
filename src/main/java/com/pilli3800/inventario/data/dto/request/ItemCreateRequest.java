@@ -7,5 +7,6 @@ public record ItemCreateRequest(
         String nombre,
         String descripcion,
         String codigoItem,
+        Long stockMinimo,
         String observaciones
 ) { }

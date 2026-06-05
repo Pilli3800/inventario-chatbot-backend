@@ -12,18 +12,28 @@ public class CapacidadesTools {
     public String getCapacidadesDelChat() {
         return """
                 Puedo ayudarte solo con consultas internas soportadas por las tools del sistema.
-                Actualmente puedo:
-                - Buscar items activos por nombre o descripcion aproximada.
-                - Buscar items activos cuyo nombre empiece con un texto especifico.
-                - Buscar items por codigo exacto o parcial.
-                - Buscar items activos por tipo: MATERIAL, HERRAMIENTA o EQUIPO.
-                - Consultar consumos anomalos por cuadrilla e item.
-                - Consultar la evolucion del consumo de un item en una cuadrilla.
-                - Consultar una proyeccion simple de consumo futuro por item.
-                - Orientar al usuario sobre la pantalla actual cuando el frontend envie contexto de pantalla.
-                - Mantener el contexto de la conversacion dentro de la sesion actual.
-                No puedo crear, modificar, aprobar, eliminar ni ejecutar acciones por el usuario.
-                No tengo permiso para ayudarte con consultas fuera del sistema o fuera de las tools disponibles.
+                Puedo:
+                - Buscar items activos por nombre, descripcion aproximada, codigo o tipo. Necesito que me digas el nombre, un codigo, una parte del texto o el tipo que quieras revisar.
+                - Buscar items por letra inicial. Necesito la letra o el texto con el que quieres empezar.
+                - Consultar el ultimo movimiento de un item. Necesito el codigo del item.
+                - Consultar el historial reciente de movimientos de un item. Necesito el codigo del item.
+                - Consultar stock de un item en sede o servicio. Necesito el codigo del item y decirme si quieres revisar una sede o un servicio, junto con su codigo.
+                - Listar items criticos por sede. Necesito el codigo de la sede.
+                - Listar items criticos por servicio. Necesito el codigo del servicio.
+                - Revisar consumos anomalos para ver si algo se salio de lo normal en un rango de dias. Necesito que me digas cuantos dias quieres revisar.
+                - Revisar la evolucion de consumo para entender como fue cambiando con el tiempo. Necesito el codigo de la cuadrilla, el codigo del item y cuantos dias quieres revisar.
+                - Hacer una proyeccion simple de consumo para estimar lo que podria venir despues. Necesito el codigo del item, los dias de historial y los dias hacia adelante que quieres proyectar.
+                - Explicar que puede hacer el chatbot.
+                - Ayudar a entender la pantalla actual. Necesito el contexto de la pantalla que estas viendo.
+                - Mantener el hilo de la conversacion dentro de la sesion actual.
+
+                No puedo:
+                - Crear registros.
+                - Modificar registros.
+                - Aprobar procesos.
+                - Eliminar informacion.
+                - Ejecutar acciones operativas.
+                - Responder libremente temas fuera del sistema, porque estoy limitado por el guard de dominio.
                 """;
     }
 }

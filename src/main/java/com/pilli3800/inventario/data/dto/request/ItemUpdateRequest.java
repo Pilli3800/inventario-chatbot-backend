@@ -9,6 +9,7 @@ public record ItemUpdateRequest(
         String descripcion,
         TipoItem tipo,
         Boolean enabled,
+        Long stockMinimo,
         String observaciones
 ) { }
 

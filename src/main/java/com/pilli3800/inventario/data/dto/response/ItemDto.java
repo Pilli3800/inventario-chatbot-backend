@@ -13,6 +13,7 @@ public record ItemDto(
         String codigoItem,
         String imagenUrl,
         boolean enabled,
+        Long stockMinimo,
         String observaciones
 ) {
 
@@ -25,6 +26,7 @@ public record ItemDto(
                 item.getCodigoItem(),
                 item.getImagenUrl(),
                 item.isEnabled(),
+                item.getStockMinimo(),
                 item.getObservaciones()
         );
     }

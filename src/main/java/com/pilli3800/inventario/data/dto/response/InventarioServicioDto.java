@@ -8,17 +8,21 @@ public record InventarioServicioDto(
         String codigoItem,
         String nombreItem,
         String tipoItem,
-        Long stockActual
+        Long stockActual,
+        boolean stockCritico
 ) {
 
     public static InventarioServicioDto from(InventarioServicio entity) {
+        Long stockMinimo = entity.getItem().getStockMinimo();
+        long stockActual = entity.getStockActual() != null ? entity.getStockActual() : 0L;
         return new InventarioServicioDto(
                 entity.getId(),
                 entity.getServicio().getCodigo(),
                 entity.getItem().getCodigoItem(),
                 entity.getItem().getNombre(),
                 entity.getItem().getTipo().name(),
-                entity.getStockActual()
+                stockActual,
+                stockMinimo != null && stockActual <= stockMinimo
         );
     }
 }

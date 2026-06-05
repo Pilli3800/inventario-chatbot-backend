@@ -21,8 +21,8 @@ public class ConsumoTools {
     private final ConsumoMlService consumoMlService;
 
     @Tool(description = """
-            Consulta consumos anomalos por cuadrilla e item.
-            Usala cuando el usuario pregunte por consumos raros, anomalos o casos fuera de lo normal.
+            Revisa si hubo consumos raros o fuera de lo normal para un item y una cuadrilla.
+            Usala cuando el usuario quiera saber si algo se salio de lo normal en el consumo.
             """)
     @PreAuthorize("isAuthenticated()")
     public String obtenerAnomaliasConsumoRecientes(Integer dias) {
@@ -48,10 +48,6 @@ public class ConsumoTools {
                 .append(dias)
                 .append(" dia(s).")
                 .append(System.lineSeparator())
-                .append("Criterio: ")
-                .append(valor(response.criterio() != null ? response.criterio().metodo() : null))
-                .append(".")
-                .append(System.lineSeparator())
                 .append(System.lineSeparator());
 
         for (int i = 0; i < anomalias.size(); i++) {
@@ -65,12 +61,10 @@ public class ConsumoTools {
                     .append(valor(anomalia.itemNombre()))
                     .append(").")
                     .append(System.lineSeparator())
-                    .append("   Consumo actual: ")
+                    .append("   Consumo observado: ")
                     .append(valor(anomalia.consumoActual()))
-                    .append(", promedio: ")
+                    .append(", referencia habitual: ")
                     .append(valor(anomalia.consumoPromedio()))
-                    .append(", z-score: ")
-                    .append(valor(anomalia.zScore()))
                     .append(".")
                     .append(System.lineSeparator())
                     .append("   Explicacion: ")
@@ -100,8 +94,8 @@ public class ConsumoTools {
     }
 
     @Tool(description = """
-            Consulta la evolucion diaria del consumo de un item en una cuadrilla.
-            Usala cuando el usuario quiera ver como se comporto el consumo en el tiempo.
+            Revisa como fue cambiando el consumo de un item en una cuadrilla con el paso de los dias.
+            Usala cuando el usuario quiera entender la evolucion del consumo en el tiempo.
             """)
     @PreAuthorize("isAuthenticated()")
     public String obtenerEvolucionConsumoPorCuadrillaEItem(
@@ -182,8 +176,8 @@ public class ConsumoTools {
     }
 
     @Tool(description = """
-            Consulta una proyeccion simple de consumo futuro de un item.
-            Usala cuando el usuario pregunte cuanto podria consumirse si el patron actual se mantiene.
+            Estima cuanto podria consumirse de un item si el patron actual se mantiene.
+            Usala cuando el usuario quiera una idea simple de lo que podria pasar despues.
             """)
     @PreAuthorize("isAuthenticated()")
     public String obtenerProyeccionConsumo(

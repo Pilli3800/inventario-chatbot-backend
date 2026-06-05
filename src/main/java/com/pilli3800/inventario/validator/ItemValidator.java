@@ -37,6 +37,10 @@ public class ItemValidator {
             errors.add("El nombreServicio del item es obligatorio");
         }
 
+        if (request.stockMinimo() == null || request.stockMinimo() <= 0) {
+            errors.add("El stock minimo del item debe ser mayor que 0");
+        }
+
         if (!errors.isEmpty()) {
             throw new ValidationException(errors);
         }

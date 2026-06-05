@@ -39,5 +39,8 @@ public class Item extends RegistroAuditoria {
     @Column(nullable = false)
     private boolean enabled = true;
 
+    @Column(name = "stock_minimo")
+    private Long stockMinimo;
+
     private String observaciones;
 }

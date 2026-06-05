@@ -18,15 +18,22 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final String origenesPermitidos;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins}")
+            String origenesPermitidos
+    ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.origenesPermitidos = origenesPermitidos;
     }
 
     @Bean
@@ -41,6 +48,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/health").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .anyRequest().authenticated()
@@ -59,7 +67,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(obtenerOrigenesPermitidos());
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -68,5 +76,12 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/api/**", configuration);
         source.registerCorsConfiguration("/uploads/**", configuration);
         return source;
+    }
+
+    private List<String> obtenerOrigenesPermitidos() {
+        return Arrays.stream(origenesPermitidos.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isBlank())
+                .collect(Collectors.toList());
     }
 }

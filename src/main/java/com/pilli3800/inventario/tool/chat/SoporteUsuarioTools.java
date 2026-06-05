@@ -11,8 +11,8 @@ public class SoporteUsuarioTools {
             Orienta al usuario sobre la pantalla actual del sistema.
             Usala cuando el usuario pida ayuda, diga que no entiende una pantalla,
             pregunte que puede hacer aqui o necesite una guia de uso.
-            No ejecuta acciones ni registra informacion; solo explica y guia.
-            Debe responder de forma breve y natural, no como manual largo.
+            No ejecuta acciones ni registra informacion; solo explica y guia con lenguaje natural.
+            Debe ayudar a entender de forma simple que pantalla esta viendo y que puede hacer ahi.
             """)
     @PreAuthorize("isAuthenticated()")
     public String obtenerAyudaPantallaActual(
@@ -40,10 +40,14 @@ public class SoporteUsuarioTools {
         ayuda.append(System.lineSeparator())
                 .append(describirPantalla(ruta, titulo, modulo))
                 .append(System.lineSeparator())
-                .append("Responde con maximo dos parrafos cortos. ")
+                .append("Responde en lenguaje natural, claro y cercano, para que el usuario entienda rapido que esta viendo y que puede hacer ahi. ")
+                .append("Usa un maximo de dos parrafos cortos. ")
                 .append("No uses tablas, listas largas, titulos decorativos ni emojis salvo que el usuario los pida. ")
-                .append("No repitas todos los elementos visibles ni todas las acciones disponibles. ")
-                .append("Explica el objetivo de la pantalla y el flujo principal. ")
+                .append("No repitas todo lo visible; resume solo lo importante para entender la pantalla. ")
+                .append("No inventes estados, filtros, botones, metricas, pestañas ni acciones que no aparezcan en el contexto. ")
+                .append("Si el contexto no alcanza para explicar algo, dilo con naturalidad y responde solo con lo que si se ve. ")
+                .append("No digas que puedes crear, aprobar, cerrar, eliminar o ejecutar acciones por el usuario. ")
+                .append("Explica primero para que sirve la pantalla y luego responde la duda concreta. ")
                 .append("Termina preguntando que parte especifica necesita entender. ")
                 .append("Si mencionas acciones, usa solo acciones presentes en el contexto.");
 
@@ -54,32 +58,33 @@ public class SoporteUsuarioTools {
         String texto = (valor(ruta, "") + " " + valor(titulo, "") + " " + valor(modulo, "")).toLowerCase();
 
         if (texto.contains("solicitud")) {
-            return "En esta pantalla el usuario puede revisar o preparar solicitudes de items. "
-                    + "Debes ayudarle a entender campos como servicio, cuadrilla, items, cantidades, estado y observaciones.";
+            return "En esta pantalla el usuario revisa solicitudes del sistema. "
+                    + "Debes ayudarle a entender de forma simple para que sirve, que informacion ve y que opciones tiene disponibles segun el contexto.";
         }
 
         if (texto.contains("movimiento")) {
-            return "En esta pantalla el usuario puede revisar movimientos de inventario. "
-                    + "Debes ayudarle a interpretar tipos de movimiento, filtros, origen, destino, item, cantidad y fechas.";
+            return "En esta pantalla el usuario revisa movimientos de inventario. "
+                    + "Debes ayudarle a interpretar lo que ve y a entender filtros, origen, destino, item, cantidad y fechas solo si aparecen en el contexto.";
         }
 
         if (texto.contains("inventario") || texto.contains("stock")) {
-            return "En esta pantalla el usuario puede revisar stock o disponibilidad. "
-                    + "Debes ayudarle a entender busquedas por item, sede, servicio, cantidades disponibles y resultados.";
+            return "En esta pantalla el usuario revisa stock o disponibilidad. "
+                    + "Debes ayudarle a entender de manera sencilla que datos puede consultar y como leer los resultados visibles.";
         }
 
         if (texto.contains("item")) {
-            return "En esta pantalla el usuario puede revisar informacion de items. "
-                    + "Debes ayudarle a entender codigo, nombre, tipo, descripcion, estado y filtros de busqueda.";
+            return "En esta pantalla el usuario revisa informacion de items. "
+                    + "Debes ayudarle a explicar que ve en la pantalla y que puede consultar sobre esos items sin inventar datos que no esten visibles.";
         }
 
         if (texto.contains("usuario")) {
-            return "En esta pantalla el usuario puede revisar informacion de usuarios. "
-                    + "Debes ayudarle a entender campos visibles, filtros, estados y roles sin modificar datos.";
+            return "En esta pantalla el usuario revisa informacion de usuarios. "
+                    + "Debes ayudarle a entender los campos visibles, los filtros y los estados, sin sugerir cambios ni acciones que no esten disponibles.";
         }
 
-        return "Explica de forma general para que sirve la pantalla actual segun la ruta, titulo, modulo, "
-                + "elementos visibles y acciones disponibles enviados por el frontend.";
+        return "Explica de forma general para que sirve la pantalla actual usando solo la ruta, titulo, modulo, "
+                + "elementos visibles y acciones disponibles enviados por el frontend. "
+                + "Si falta informacion, dilo con claridad y no completes con suposiciones.";
     }
 
     private boolean tieneValor(String valor) {

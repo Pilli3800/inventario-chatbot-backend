@@ -8,17 +8,21 @@ public record InventarioSedeDto(
         String codigoItem,
         String nombreItem,
         String tipoItem,
-        Long stock
+        Long stock,
+        boolean stockCritico
 ) {
 
     public static InventarioSedeDto from(InventarioSede entity) {
+        Long stockMinimo = entity.getItem().getStockMinimo();
+        long stock = entity.getStock() != null ? entity.getStock() : 0L;
         return new InventarioSedeDto(
                 entity.getId(),
                 entity.getSede().getCodigo(),
                 entity.getItem().getCodigoItem(),
                 entity.getItem().getNombre(),
                 entity.getItem().getTipo().name(),
-                entity.getStock()
+                stock,
+                stockMinimo != null && stock <= stockMinimo
         );
     }
 }

@@ -12,10 +12,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 @FeignClient(
-        name = "consumo-ml-client",
-        url = "${consumo.ml.url:http://127.0.0.1:8081}"
+        name = "cliente-consumo-ml",
+        url = "${consumo.ml.url}"
 )
-public interface ConsumoMlClient {
+public interface ClienteConsumoMl {
 
     @GetMapping("/ml/consumo/anomalias")
     ConsumoAnomaliaResponse obtenerAnomalias(

@@ -23,43 +23,43 @@ public class ItemImageStorageService {
             "image/webp", "webp"
     );
 
-    private final Path itemsPath;
-    private final String publicBaseUrl;
+    private final Path rutaItems;
+    private final String basePublica;
 
     public ItemImageStorageService(
-            @Value("${app.uploads.items-path:uploads/items}") String itemsPath,
-            @Value("${app.uploads.items-public-base-url:/uploads/items}") String publicBaseUrl
+            @Value("${app.uploads.items-path}") String rutaItems,
+            @Value("${app.uploads.items-public-base-url}") String basePublica
     ) {
-        this.itemsPath = Paths.get(itemsPath).toAbsolutePath().normalize();
-        this.publicBaseUrl = normalizarBaseUrl(publicBaseUrl);
+        this.rutaItems = Paths.get(rutaItems).toAbsolutePath().normalize();
+        this.basePublica = normalizarBasePublica(basePublica);
     }
 
     public String guardarImagenItem(String codigoItem, MultipartFile file, String imagenActualUrl) throws IOException {
         validarArchivo(file);
-        Files.createDirectories(itemsPath);
+        Files.createDirectories(rutaItems);
 
         eliminarImagen(imagenActualUrl);
 
         String extension = EXTENSIONES_PERMITIDAS.get(file.getContentType());
         String nombreArchivo = codigoItem + "." + extension;
-        Path destino = itemsPath.resolve(nombreArchivo).normalize();
+        Path destino = rutaItems.resolve(nombreArchivo).normalize();
 
-        if (!destino.startsWith(itemsPath)) {
+        if (!destino.startsWith(rutaItems)) {
             throw new ValidationException(List.of("Ruta de imagen invalida"));
         }
 
         Files.copy(file.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
-        return publicBaseUrl + "/" + nombreArchivo;
+        return basePublica + "/" + nombreArchivo;
     }
 
     public void eliminarImagen(String imagenUrl) throws IOException {
-        if (imagenUrl == null || imagenUrl.isBlank() || !imagenUrl.startsWith(publicBaseUrl + "/")) {
+        if (imagenUrl == null || imagenUrl.isBlank() || !imagenUrl.startsWith(basePublica + "/")) {
             return;
         }
 
-        String nombreArchivo = imagenUrl.substring((publicBaseUrl + "/").length());
-        Path archivo = itemsPath.resolve(nombreArchivo).normalize();
-        if (archivo.startsWith(itemsPath)) {
+        String nombreArchivo = imagenUrl.substring((basePublica + "/").length());
+        Path archivo = rutaItems.resolve(nombreArchivo).normalize();
+        if (archivo.startsWith(rutaItems)) {
             Files.deleteIfExists(archivo);
         }
     }
@@ -76,10 +76,10 @@ public class ItemImageStorageService {
         }
     }
 
-    private String normalizarBaseUrl(String baseUrl) {
-        if (baseUrl.endsWith("/")) {
-            return baseUrl.substring(0, baseUrl.length() - 1);
+    private String normalizarBasePublica(String basePublica) {
+        if (basePublica.endsWith("/")) {
+            return basePublica.substring(0, basePublica.length() - 1);
         }
-        return baseUrl;
+        return basePublica;
     }
 }

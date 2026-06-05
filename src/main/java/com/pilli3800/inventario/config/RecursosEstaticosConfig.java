@@ -8,20 +8,24 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.nio.file.Paths;
 
 @Configuration
-public class StaticResourceConfig implements WebMvcConfigurer {
+public class RecursosEstaticosConfig implements WebMvcConfigurer {
 
-    private final String itemsPath;
+    private final String rutaItems;
 
-    public StaticResourceConfig(
-            @Value("${app.uploads.items-path:uploads/items}") String itemsPath
+    public RecursosEstaticosConfig(
+            @Value("${app.uploads.items-path}") String rutaItems
     ) {
-        this.itemsPath = itemsPath;
+        this.rutaItems = rutaItems;
     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String location = Paths.get(itemsPath).toAbsolutePath().normalize().toUri().toString();
+        agregarRecursosEstaticos(registry);
+    }
+
+    private void agregarRecursosEstaticos(ResourceHandlerRegistry registry) {
+        String ubicacion = Paths.get(rutaItems).toAbsolutePath().normalize().toUri().toString();
         registry.addResourceHandler("/uploads/items/**")
-                .addResourceLocations(location);
+                .addResourceLocations(ubicacion);
     }
 }

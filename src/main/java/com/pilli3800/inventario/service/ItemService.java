@@ -97,6 +97,7 @@ public class ItemService {
         item.setDescripcion(request.descripcion());
         item.setCodigoItem(TextNormalizer.normalizeCode(request.codigoItem()));
         item.setEnabled(true);
+        item.setStockMinimo(request.stockMinimo());
         item.setObservaciones(request.observaciones());
 
         return ItemDto.from(itemRepository.save(item));
@@ -114,6 +115,7 @@ public class ItemService {
         item.setNombre(request.nombre());
         item.setDescripcion(request.descripcion());
         item.setEnabled(request.enabled());
+        item.setStockMinimo(request.stockMinimo());
         item.setObservaciones(request.observaciones());
 
         return ItemDto.from(itemRepository.save(item));

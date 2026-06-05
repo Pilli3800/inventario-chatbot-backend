@@ -17,15 +17,17 @@ public class ItemUpdateValidator {
         List<String> errors = new ArrayList<>();
 
         if (request.nombre() != null && request.nombre().isBlank()) {
-            errors.add("El nombreServicio del item no puede estar vacío");
+            errors.add("El nombre del item no puede estar vacio");
         }
 
-        // Descripcion
+        if (request.stockMinimo() == null || request.stockMinimo() <= 0) {
+            errors.add("El stock minimo del item debe ser mayor que 0");
+        }
+
         if (request.descripcion().length() > 255) {
-            errors.add("La descripcionServicio del item es muy larga, maximo 255 caracteres");
+            errors.add("La descripcion del item es muy larga, maximo 255 caracteres");
         }
 
-        // Observaciones
         if (request.observaciones().length() > 255) {
             errors.add("Las observaciones del item es muy larga, maximo 255 caracteres");
         }
