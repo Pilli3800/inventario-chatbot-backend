@@ -30,6 +30,8 @@
 		<java.version>21</java.version>
 		<spring-ai.version>1.1.2</spring-ai.version>
 		<spring-cloud.version>2025.0.0</spring-cloud.version>
+		<sonar.projectKey>com.pilli3800:inventario</sonar.projectKey>
+		<sonar.projectName>inventario</sonar.projectName>
 	</properties>
 
 	<dependencyManagement>
@@ -145,6 +147,11 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>5.5.0.6356</version>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
